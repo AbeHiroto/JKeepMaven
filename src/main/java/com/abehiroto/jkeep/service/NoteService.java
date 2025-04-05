@@ -17,6 +17,14 @@ public class NoteService {
     public NoteService(NoteRepository noteRepository) {
         this.noteRepository = noteRepository;
     }
+    
+    public Note createNote(NoteRequest request, User user) {
+        Note note = new Note();
+        note.setTitle(request.getTitle());
+        note.setContent(request.getContent());
+        note.setUser(user);  // ユーザーを設定
+        return noteRepository.save(note);
+    }
 
     public Note saveNote(Note note) {
         note.setLastEdited(LocalDateTime.now());  // 更新日時を自動設定

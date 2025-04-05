@@ -19,8 +19,11 @@ public class Note {
     
     private LocalDateTime lastEdited;  // 最終更新日時
     
-    // 明示的にsetterを追加
-    public void setLastEdited(LocalDateTime lastEdited) {
-        this.lastEdited = lastEdited;
-    }
+    @Column(name = "sort_order", nullable = false)  // カラム名を明示的に指定
+    private Integer order = 0;  // Javaフィールド名はorderでも可
+    
+ // ユーザー関連付け（多対1）
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }
