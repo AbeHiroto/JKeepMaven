@@ -26,4 +26,30 @@ public class Note {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+    
+ // 明示的にセッターメソッドを定義（Lombokと共存可能）
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setOrder(Integer order) {
+        this.order = order;
+    }
+
+    public void setLastEdited(LocalDateTime lastEdited) {
+        this.lastEdited = lastEdited;
+    }
+    
+ // 明示的にゲッターを定義（テストで必要になるため）
+    public Integer getOrder() {
+        return this.order;
+    }
+
+    public LocalDateTime getLastEdited() {
+        return this.lastEdited;
+    }
+
+    public User getUser() {
+        return this.user;
+    }
 }

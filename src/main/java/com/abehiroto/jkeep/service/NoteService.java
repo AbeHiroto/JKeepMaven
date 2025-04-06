@@ -1,37 +1,24 @@
 package com.abehiroto.jkeep.service;
 
-import com.abehiroto.jkeep.bean.Note;
-import com.abehiroto.jkeep.repository.NoteRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
-import java.util.List;
+import org.springframework.stereotype.Service;
+import com.abehiroto.jkeep.bean.Note;
+import com.abehiroto.jkeep.bean.User;
+import com.abehiroto.jkeep.repository.NoteRepository;
 
 @Service
-@Transactional
 public class NoteService {
+
     private final NoteRepository noteRepository;
 
-    // コンストラクタインジェクション
     public NoteService(NoteRepository noteRepository) {
         this.noteRepository = noteRepository;
     }
-    
-    public Note createNote(NoteRequest request, User user) {
-        Note note = new Note();
-        note.setTitle(request.getTitle());
-        note.setContent(request.getContent());
-        note.setUser(user);  // ユーザーを設定
-        return noteRepository.save(note);
-    }
 
-    public Note saveNote(Note note) {
-        note.setLastEdited(LocalDateTime.now());  // 更新日時を自動設定
+    public Note saveNewNote(Note note, User user) {
+        note.setUser(user);
+        note.setOrder(0); // 新規メモは常に先頭
+        note.setLastEdited(LocalDateTime.now());
         return noteRepository.save(note);
-    }
-
-    public List<Note> getAllNotes() {
-        return noteRepository.findAll();  // 全件取得
     }
 }
