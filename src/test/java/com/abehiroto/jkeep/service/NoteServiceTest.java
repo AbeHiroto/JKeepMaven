@@ -25,16 +25,22 @@ class NoteServiceTest {
 
     @Test
     void saveNewNote_ShouldSetDefaultValues() {
-        // テストデータ準備
-        User user = new User(1L, "user1", "password");
-        Note newNote = new Note();
-        newNote.setTitle("Test Title");
-        newNote.setContent("Test Content");
+        // テストデータ準備（Builderパターン使用）
+        User user = User.builder()
+            .id(1L)
+            .username("user1")
+            .password("password")
+            .build();
+        
+        Note newNote = Note.builder()
+            .title("Test Title")
+            .content("Test Content")
+            .build();
 
         // モック設定
         when(noteRepository.save(any(Note.class))).thenAnswer(invocation -> {
             Note saved = invocation.getArgument(0);
-            saved.setId(1L); // 保存時にIDがセットされると仮定
+            saved.setId(1L);
             return saved;
         });
 
@@ -43,9 +49,9 @@ class NoteServiceTest {
 
         // 検証
         assertAll(
-            () -> assertEquals(0, result.getOrder(), "新規メモのsort_orderは0"),
-            () -> assertNotNull(result.getLastEdited(), "最終更新日時が設定されている"),
-            () -> assertEquals(user, result.getUser(), "ユーザーが紐づいている")
+            () -> assertEquals(0, result.getOrder()),
+            () -> assertNotNull(result.getLastEdited()),
+            () -> assertEquals(user, result.getUser())
         );
     }
 }

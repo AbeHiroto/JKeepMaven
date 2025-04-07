@@ -1,55 +1,64 @@
 package com.abehiroto.jkeep.bean;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
-@Data
 @Entity
+@Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;  // 自動採番ID
+    private Long id;
     
     @Column(nullable = false)
-    private String title;  // メモのタイトル（必須）
+    private String title;
     
     @Column(columnDefinition = "TEXT")
-    private String content;  // メモ本文（長文対応）
+    private String content;
     
-    private LocalDateTime lastEdited;  // 最終更新日時
+    private LocalDateTime lastEdited;
     
-    @Column(name = "sort_order", nullable = false)  // カラム名を明示的に指定
-    private Integer order = 0;  // Javaフィールド名はorderでも可
+    @Column(name = "sort_order", nullable = false)
+    @Builder.Default
+    private Integer order = 0;
     
- // ユーザー関連付け（多対1）
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
     
- // 明示的にセッターメソッドを定義（Lombokと共存可能）
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public void setOrder(Integer order) {
-        this.order = order;
-    }
-
-    public void setLastEdited(LocalDateTime lastEdited) {
-        this.lastEdited = lastEdited;
+    @PrePersist
+    @PreUpdate
+    private void updateTimestamps() {
+        this.lastEdited = LocalDateTime.now();
     }
     
- // 明示的にゲッターを定義（テストで必要になるため）
-    public Integer getOrder() {
-        return this.order;
+    public void setTitle(String title) {
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("タイトル必須");
+        }
+        this.title = title;
     }
-
-    public LocalDateTime getLastEdited() {
-        return this.lastEdited;
+    
+    public void setOrder(Integer order) {
+        if (order < 0) throw new IllegalArgumentException("順序は0以上");
+        this.order = order;
     }
-
-    public User getUser() {
-        return this.user;
+    
+    // テスト用ファクトリメソッド
+    public static Note createTestNote(String title, User user) {
+        return builder()
+            .title(title)
+            .user(user)
+            .order(0)
+            .build();
     }
 }

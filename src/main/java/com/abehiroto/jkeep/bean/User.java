@@ -11,13 +11,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+//import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,16 +30,28 @@ public class User {
     @Column(unique = true, nullable = false, length = 50)
     private String username;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 60)
     private String password;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Note> notes = new ArrayList<>();
-
-    // テスト用に簡易コンストラクタを追加（オプション）
-    public User(Long id, String username, String password) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
+    
+    public void addNote(Note note) {
+        notes.add(note);
+        note.setUser(this);
     }
+    
+    // テスト用ファクトリメソッド
+    public static User createTestUser(Long id, String username, String password) {
+        return builder()
+            .id(id)
+            .username(username)
+            .password(password)
+            .build();
+    }
+    
+//    public void setPassword(String rawPassword) {
+//        this.password = PasswordEncoder.encode(rawPassword);
+//    }
 }
