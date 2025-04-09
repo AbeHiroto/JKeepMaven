@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 // import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,14 +29,7 @@ class NoteServiceTest {
 
 //    // Mockitoによる不要なスタビングの検知のエラーを回避するため各メソッド内に移動
 //    @BeforeEach
-//    void setUp() {
-//        // 共通モック設定
-//        when(noteRepository.save(any(Note.class)))
-//            .thenAnswer(inv -> inv.getArgument(0));
-//        
-//        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
-//            .thenReturn(List.of());
-//    }
+//    void setUp() {共通モック設定}
     
     private User createTestUser() {
 	    return User.builder().id(1L).username("test").password("password").build();
@@ -44,126 +38,129 @@ class NoteServiceTest {
 	private Note createTestNote(String title) {
 	    return Note.builder().title(title).build();
 	}
+	
+	@Nested
+	class SaveNewNote {
+		@Test
+	    void shouldSetDefaultValues() {
+	        // 初期設定
+	        User user = User.builder().id(1L).build();
+	        Note newNote = Note.builder().title("Test").build();
+	        
+	        when(noteRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-    @Test
-    void shouldSetDefaultValues() {
-        // 初期設定
-        User user = User.builder().id(1L).build();
-        Note newNote = Note.builder().title("Test").build();
-        
-        when(noteRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+	        // 実行 & 検証
+	        Note result = noteService.saveNewNote(newNote, user);
+	        
+	        assertAll(
+	            () -> assertEquals(0, result.getOrder()),
+	            () -> assertEquals(user, result.getUser()),
+	            () -> assertNotNull(result.getLastEdited())
+	        );
+	    }
+	    
+	    @Test
+	    void shouldSetDefaultTitleWhenTitleIsBlank() {
+	        Note note = createTestNote("   ");
+	        
+	        when(noteRepository.save(any(Note.class)))
+	        .thenAnswer(inv -> inv.getArgument(0));
+	    
+	        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
+	        .thenReturn(List.of());
+	        
+	        Note result = noteService.saveNewNote(note, createTestUser());
+	        assertEquals("無題のメモ", result.getTitle());
+	    }
+	    
+//	    // 空白の自動削除
+//	    @Test
+//	    void shouldTrimContentWhitespace() {
+//	        User user = createTestUser();
+//	        Note note = Note.builder()
+//	            .title("Test")
+//	            .content("  Hello World  ")
+//	            .build();
+//	        
+//	        Note result = noteService.saveNewNote(note, user);
+//	        assertEquals("Hello World", result.getContent());
+//	    }
 
-        // 実行 & 検証
-        Note result = noteService.saveNewNote(newNote, user);
-        
-        assertAll(
-            () -> assertEquals(0, result.getOrder()),
-            () -> assertEquals(user, result.getUser()),
-            () -> assertNotNull(result.getLastEdited())
-        );
-    }
-    
-    @Test
-    void shouldSetDefaultTitleWhenTitleIsBlank() {
-        Note note = createTestNote("   ");
-        
-        when(noteRepository.save(any(Note.class)))
-        .thenAnswer(inv -> inv.getArgument(0));
-    
-        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
-        .thenReturn(List.of());
-        
-        Note result = noteService.saveNewNote(note, createTestUser());
-        assertEquals("無題のメモ", result.getTitle());
-    }
-    
-//    // 空白の自動削除
-//    @Test
-//    void shouldTrimContentWhitespace() {
-//        User user = createTestUser();
-//        Note note = Note.builder()
-//            .title("Test")
-//            .content("  Hello World  ")
-//            .build();
-//        
-//        Note result = noteService.saveNewNote(note, user);
-//        assertEquals("Hello World", result.getContent());
-//    }
-
-    @Test
-    void shouldRejectNullNote() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            noteService.saveNewNote(null, createTestUser());
-        });
-    }
-    
-    @Test
-    void shouldHandleNullContent() {
-        Note note = createTestNote("タイトル").toBuilder()
-            .content(null)
-            .build();
-        
-        when(noteRepository.save(any(Note.class)))
-        .thenAnswer(inv -> inv.getArgument(0));
-    
-        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
-        .thenReturn(List.of());
-        
-        Note result = noteService.saveNewNote(note, createTestUser());
-        assertTrue(result.getContent().isEmpty());
-    }
-    
-    @Test
-    void shouldAllowEmptyContent() {
-        User user = createTestUser();
-        Note note = Note.builder().title("タイトル").content("").build();
-        
-        when(noteRepository.save(any(Note.class)))
-        .thenAnswer(inv -> inv.getArgument(0));
-    
-        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
-        .thenReturn(List.of());
-        
-        Note result = noteService.saveNewNote(note, user);
-        assertTrue(result.getContent().isEmpty());
-    }
-    
-    @Test
-    void shouldTrimWhitespaceOnlyContent() {
-        User user = createTestUser();
-        Note note = Note.builder()
-            .title("タイトル")
-            .content("   ") // 半角スペースのみ
-            .build();
-        
-        when(noteRepository.save(any(Note.class)))
-        .thenAnswer(inv -> inv.getArgument(0));
-    
-        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
-        .thenReturn(List.of());
-        
-        Note result = noteService.saveNewNote(note, user);
-        assertTrue(result.getContent().isEmpty());
-    }
-    
-    @Test
-    void shouldIncrementOrderWhenNoteExists() {
-        User user = User.builder().id(1L).build();
-        Note existingNote = Note.builder().id(1L).order(0).user(user).build();
-        
-        when(noteRepository.findByUserOrderByOrderAsc(user))
-            .thenReturn(List.of(existingNote));
-        
-        Note newNote = Note.builder().title("New Note").build();
-        noteService.saveNewNote(newNote, user);
-        
-        verify(noteRepository).saveAll(argThat((List<Note> notes) ->
-        notes.get(0).getOrder() == 1 && notes.size() == 1
-        ));
-        // ↓型が明示されていないためエラー↑で型明示
-//        verify(noteRepository).saveAll(argThat(notes ->
-//            notes.get(0).getOrder() == 1 &&
-//            notes.size() == 1
-//        ));
-    }
+	    @Test
+	    void shouldRejectNullNote() {
+	        assertThrows(IllegalArgumentException.class, () -> {
+	            noteService.saveNewNote(null, createTestUser());
+	        });
+	    }
+	    
+	    @Test
+	    void shouldHandleNullContent() {
+	        Note note = createTestNote("タイトル").toBuilder()
+	            .content(null)
+	            .build();
+	        
+	        when(noteRepository.save(any(Note.class)))
+	        .thenAnswer(inv -> inv.getArgument(0));
+	    
+	        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
+	        .thenReturn(List.of());
+	        
+	        Note result = noteService.saveNewNote(note, createTestUser());
+	        assertTrue(result.getContent().isEmpty());
+	    }
+	    
+	    @Test
+	    void shouldAllowEmptyContent() {
+	        User user = createTestUser();
+	        Note note = Note.builder().title("タイトル").content("").build();
+	        
+	        when(noteRepository.save(any(Note.class)))
+	        .thenAnswer(inv -> inv.getArgument(0));
+	    
+	        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
+	        .thenReturn(List.of());
+	        
+	        Note result = noteService.saveNewNote(note, user);
+	        assertTrue(result.getContent().isEmpty());
+	    }
+	    
+	    @Test
+	    void shouldTrimWhitespaceOnlyContent() {
+	        User user = createTestUser();
+	        Note note = Note.builder()
+	            .title("タイトル")
+	            .content("   ") // 半角スペースのみ
+	            .build();
+	        
+	        when(noteRepository.save(any(Note.class)))
+	        .thenAnswer(inv -> inv.getArgument(0));
+	    
+	        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
+	        .thenReturn(List.of());
+	        
+	        Note result = noteService.saveNewNote(note, user);
+	        assertTrue(result.getContent().isEmpty());
+	    }
+	    
+	    @Test
+	    void shouldIncrementOrderWhenNoteExists() {
+	        User user = User.builder().id(1L).build();
+	        Note existingNote = Note.builder().id(1L).order(0).user(user).build();
+	        
+	        when(noteRepository.findByUserOrderByOrderAsc(user))
+	            .thenReturn(List.of(existingNote));
+	        
+	        Note newNote = Note.builder().title("New Note").build();
+	        noteService.saveNewNote(newNote, user);
+	        
+	        verify(noteRepository).saveAll(argThat((List<Note> notes) ->
+	        notes.get(0).getOrder() == 1 && notes.size() == 1
+	        ));
+	        // ↓型が明示されていないためエラー↑で型明示
+//	        verify(noteRepository).saveAll(argThat(notes ->
+//	            notes.get(0).getOrder() == 1 &&
+//	            notes.size() == 1
+//	        ));
+	    }
+	}
 }
