@@ -27,7 +27,8 @@ public class NoteService {
 
         // タイトルと本文のデフォルト設定
         String title = (note.getTitle() == null || note.getTitle().isBlank()) ? 
-            "無題のメモ" : note.getTitle().trim();
+            "無題のメモ" :
+            	note.getTitle().trim().substring(0, Math.min(255, note.getTitle().trim().length()));
         
         // 変更後（より意図が明確）
         String content = Optional.ofNullable(note.getContent())

@@ -1,5 +1,6 @@
 package com.abehiroto.jkeep.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -7,10 +8,13 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 // import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,7 +44,7 @@ class NoteServiceTest {
 	}
 	
 	@Nested
-	class SaveNewNote {
+	class SaveNewNoteTest {
 		@Test
 	    void shouldSetDefaultValues() {
 	        // 初期設定
@@ -73,18 +77,23 @@ class NoteServiceTest {
 	        assertEquals("無題のメモ", result.getTitle());
 	    }
 	    
-//	    // 空白の自動削除
-//	    @Test
-//	    void shouldTrimContentWhitespace() {
-//	        User user = createTestUser();
-//	        Note note = Note.builder()
-//	            .title("Test")
-//	            .content("  Hello World  ")
-//	            .build();
-//	        
-//	        Note result = noteService.saveNewNote(note, user);
-//	        assertEquals("Hello World", result.getContent());
-//	    }
+	    @Test
+	    void shouldTrimContentWhitespace() {
+	        User user = createTestUser();
+	        Note note = Note.builder()
+	            .title("Test")
+	            .content("  Hello World  ")
+	            .build();
+	        
+	        when(noteRepository.save(any(Note.class)))
+	        .thenAnswer(inv -> inv.getArgument(0));
+	    
+	        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
+	        .thenReturn(List.of());
+	        
+	        Note result = noteService.saveNewNote(note, user);
+	        assertEquals("Hello World", result.getContent());
+	    }
 
 	    @Test
 	    void shouldRejectNullNote() {
@@ -156,11 +165,33 @@ class NoteServiceTest {
 	        verify(noteRepository).saveAll(argThat((List<Note> notes) ->
 	        notes.get(0).getOrder() == 1 && notes.size() == 1
 	        ));
-	        // ↓型が明示されていないためエラー↑で型明示
-//	        verify(noteRepository).saveAll(argThat(notes ->
-//	            notes.get(0).getOrder() == 1 &&
-//	            notes.size() == 1
-//	        ));
+	    }
+	    
+	    @Test
+	    @DisplayName("255文字を超えるタイトルは自動的に切り詰められる")
+	    void shouldTruncateOverlengthTitle() {
+	        String longTitle = "a".repeat(300);
+	        Note note = createTestNote(longTitle);
+	        
+	        when(noteRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+	        
+	        Note result = noteService.saveNewNote(note, createTestUser());
+	        assertThat(result.getTitle())
+	            .hasSize(255)
+	            .startsWith("aaaaaaaaaa"); // 切り詰め後の内容を検証
+	    }
+
+	    @ParameterizedTest
+	    @ValueSource(ints = {255, 256, 1000})
+	    @DisplayName("様々な長さのタイトル入力テスト")
+	    void shouldHandleVariousTitleLengths(int length) {
+	        String title = "a".repeat(length);
+	        Note note = createTestNote(title);
+	        
+	        when(noteRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+	        
+	        Note result = noteService.saveNewNote(note, createTestUser());
+	        assertThat(result.getTitle()).hasSizeLessThanOrEqualTo(255);
 	    }
 	}
 }
