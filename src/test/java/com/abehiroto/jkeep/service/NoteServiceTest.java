@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 // import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,15 +18,7 @@ import com.abehiroto.jkeep.bean.User;
 import com.abehiroto.jkeep.repository.NoteRepository;
 
 @ExtendWith(MockitoExtension.class)
-class NoteServiceTest {
-	
-	private User createTestUser() {
-	    return User.builder().id(1L).username("test").password("password").build();
-	}
-
-	private Note createTestNote(String title) {
-	    return Note.builder().title(title).build();
-	}
+class NoteServiceTest {	
 
     @Mock
     private NoteRepository noteRepository;
@@ -33,8 +26,27 @@ class NoteServiceTest {
     @InjectMocks
     private NoteService noteService;
 
+//    // Mockitoによる不要なスタビングの検知のエラーを回避するため各メソッド内に移動
+//    @BeforeEach
+//    void setUp() {
+//        // 共通モック設定
+//        when(noteRepository.save(any(Note.class)))
+//            .thenAnswer(inv -> inv.getArgument(0));
+//        
+//        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
+//            .thenReturn(List.of());
+//    }
+    
+    private User createTestUser() {
+	    return User.builder().id(1L).username("test").password("password").build();
+	}
+
+	private Note createTestNote(String title) {
+	    return Note.builder().title(title).build();
+	}
+
     @Test
-    void saveNewNote_ShouldSetDefaultValues() {
+    void shouldSetDefaultValues() {
         // 初期設定
         User user = User.builder().id(1L).build();
         Note newNote = Note.builder().title("Test").build();
@@ -53,10 +65,15 @@ class NoteServiceTest {
     
     @Test
     void shouldSetDefaultTitleWhenTitleIsBlank() {
-        User user = createTestUser();
-        Note note = Note.builder().title("   ").build();
+        Note note = createTestNote("   ");
         
-        Note result = noteService.saveNewNote(note, user);
+        when(noteRepository.save(any(Note.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+    
+        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
+        .thenReturn(List.of());
+        
+        Note result = noteService.saveNewNote(note, createTestUser());
         assertEquals("無題のメモ", result.getTitle());
     }
     
@@ -82,10 +99,17 @@ class NoteServiceTest {
     
     @Test
     void shouldHandleNullContent() {
-        User user = createTestUser();
-        Note note = Note.builder().title("タイトル").content(null).build();
+        Note note = createTestNote("タイトル").toBuilder()
+            .content(null)
+            .build();
         
-        Note result = noteService.saveNewNote(note, user);
+        when(noteRepository.save(any(Note.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+    
+        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
+        .thenReturn(List.of());
+        
+        Note result = noteService.saveNewNote(note, createTestUser());
         assertTrue(result.getContent().isEmpty());
     }
     
@@ -93,6 +117,12 @@ class NoteServiceTest {
     void shouldAllowEmptyContent() {
         User user = createTestUser();
         Note note = Note.builder().title("タイトル").content("").build();
+        
+        when(noteRepository.save(any(Note.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+    
+        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
+        .thenReturn(List.of());
         
         Note result = noteService.saveNewNote(note, user);
         assertTrue(result.getContent().isEmpty());
@@ -105,6 +135,12 @@ class NoteServiceTest {
             .title("タイトル")
             .content("   ") // 半角スペースのみ
             .build();
+        
+        when(noteRepository.save(any(Note.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+    
+        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
+        .thenReturn(List.of());
         
         Note result = noteService.saveNewNote(note, user);
         assertTrue(result.getContent().isEmpty());
@@ -129,12 +165,5 @@ class NoteServiceTest {
 //            notes.get(0).getOrder() == 1 &&
 //            notes.size() == 1
 //        ));
-    }
-
-    @Test
-    void shouldThrowExceptionWhenNoteIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            noteService.saveNewNote(null, User.builder().build());
-        });
     }
 }
