@@ -1,4 +1,4 @@
-INSERT INTO user (id, username, password) VALUES 
+INSERT INTO users (id, username, password) VALUES 
     (1, 'user1', '$2a$10$xLH7A3...'),  -- パスワードはBCryptでハッシュ化
     (2, 'user2', '$2a$10$yTKR8B...');
 
