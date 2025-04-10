@@ -37,3 +37,10 @@ jobs:
         path: |
           target/surefire-reports/
           target/failsafe-reports/
+
+    # デバッグ用
+    - name: Debug Java version
+      run: java -version
+
+    - name: List files
+      run: ls -la
