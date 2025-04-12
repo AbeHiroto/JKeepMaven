@@ -22,6 +22,13 @@ spring:
       password: dummy
       roles: DUMMY
 
+  h2:
+    console:
+      enabled: true    # H2 Console を有効化
+      path: /h2-console # SecurityConfig で許可したパスと合わせる
+#      settings:
+#        web-allow-others: false # テストでは通常 false
+
   sql:
     init:
       mode: never # テスト実行時は schema.sql, data.sql を実行しない
