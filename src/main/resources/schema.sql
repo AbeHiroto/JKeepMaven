@@ -1,8 +1,9 @@
 -- 既存テーブル削除（オプション）
 DROP TABLE IF EXISTS note;
+DROP TABLE IF EXISTS users;
 
 -- テーブル作成
-CREATE TABLE IF NOT EXISTS user (
+CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(100) NOT NULL

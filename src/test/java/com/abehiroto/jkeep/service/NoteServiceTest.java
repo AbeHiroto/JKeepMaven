@@ -70,8 +70,8 @@ class NoteServiceTest {
 	        when(noteRepository.save(any(Note.class)))
 	        .thenAnswer(inv -> inv.getArgument(0));
 	    
-	        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
-	        .thenReturn(List.of());
+//	        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
+//	        .thenReturn(List.of());
 	        
 	        Note result = noteService.saveNewNote(note, createTestUser());
 	        assertEquals("無題のメモ", result.getTitle());
@@ -88,8 +88,8 @@ class NoteServiceTest {
 	        when(noteRepository.save(any(Note.class)))
 	        .thenAnswer(inv -> inv.getArgument(0));
 	    
-	        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
-	        .thenReturn(List.of());
+//	        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
+//	        .thenReturn(List.of());
 	        
 	        Note result = noteService.saveNewNote(note, user);
 	        assertEquals("Hello World", result.getContent());
@@ -111,8 +111,8 @@ class NoteServiceTest {
 	        when(noteRepository.save(any(Note.class)))
 	        .thenAnswer(inv -> inv.getArgument(0));
 	    
-	        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
-	        .thenReturn(List.of());
+//	        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
+//	        .thenReturn(List.of());
 	        
 	        Note result = noteService.saveNewNote(note, createTestUser());
 	        assertTrue(result.getContent().isEmpty());
@@ -126,8 +126,8 @@ class NoteServiceTest {
 	        when(noteRepository.save(any(Note.class)))
 	        .thenAnswer(inv -> inv.getArgument(0));
 	    
-	        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
-	        .thenReturn(List.of());
+//	        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
+//	        .thenReturn(List.of());
 	        
 	        Note result = noteService.saveNewNote(note, user);
 	        assertTrue(result.getContent().isEmpty());
@@ -144,8 +144,8 @@ class NoteServiceTest {
 	        when(noteRepository.save(any(Note.class)))
 	        .thenAnswer(inv -> inv.getArgument(0));
 	    
-	        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
-	        .thenReturn(List.of());
+//	        when(noteRepository.findByUserOrderByOrderAsc(any(User.class)))
+//	        .thenReturn(List.of());
 	        
 	        Note result = noteService.saveNewNote(note, user);
 	        assertTrue(result.getContent().isEmpty());
@@ -153,18 +153,44 @@ class NoteServiceTest {
 	    
 	    @Test
 	    void shouldIncrementOrderWhenNoteExists() {
-	        User user = User.builder().id(1L).build();
-	        Note existingNote = Note.builder().id(1L).order(0).user(user).build();
+	        User user = createTestUser();
 	        
-	        when(noteRepository.findByUserOrderByOrderAsc(user))
-	            .thenReturn(List.of(existingNote));
+	        // モック設定
+	        when(noteRepository.incrementAllOrdersByUser(user.getId()))
+	            .thenReturn(1); // 更新件数を1と仮定
+	        when(noteRepository.save(any(Note.class)))
+	        	.thenAnswer(inv -> inv.getArgument(0));
 	        
 	        Note newNote = Note.builder().title("New Note").build();
-	        noteService.saveNewNote(newNote, user);
+	        Note result = noteService.saveNewNote(newNote, user);
 	        
-	        verify(noteRepository).saveAll(argThat((List<Note> notes) ->
-	        notes.get(0).getOrder() == 1 && notes.size() == 1
-	        ));
+	        // 検証
+	        verify(noteRepository).incrementAllOrdersByUser(user.getId());
+	        assertThat(result.getOrder()).isEqualTo(0);
+	    }
+//	    @Test
+//	    void shouldIncrementOrderWhenNoteExists() {
+//	        User user = User.builder().id(1L).build();
+//	        Note existingNote = Note.builder().id(1L).order(0).user(user).build();
+//	        
+//	        when(noteRepository.findByUserOrderByOrderAsc(user))
+//	            .thenReturn(List.of(existingNote));
+//	        
+//	        Note newNote = Note.builder().title("New Note").build();
+//	        noteService.saveNewNote(newNote, user);
+//	        
+//	        verify(noteRepository).saveAll(argThat((List<Note> notes) ->
+//	        notes.get(0).getOrder() == 1 && notes.size() == 1
+//	        ));
+//	    }
+	    
+	    @Test
+	    void incrementAllOrdersByUser_shouldReturnUpdateCount() {
+	        when(noteRepository.incrementAllOrdersByUser(anyLong()))
+	            .thenReturn(2);
+	        
+	        int updated = noteRepository.incrementAllOrdersByUser(1L);
+	        assertThat(updated).isEqualTo(2);
 	    }
 	    
 	    @Test

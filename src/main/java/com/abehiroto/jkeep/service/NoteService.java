@@ -1,7 +1,7 @@
 package com.abehiroto.jkeep.service;
 
 import java.time.LocalDateTime;
-import java.util.List;
+// import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -19,11 +19,9 @@ public class NoteService {
     public NoteService(NoteRepository noteRepository) {
         this.noteRepository = noteRepository;
     }
-
+    
     public Note saveNewNote(Note note, User user) {
-        if (note == null) {
-            throw new IllegalArgumentException("メモデータ必須");
-        }
+    	if (note == null) throw new IllegalArgumentException("Note must not be null");
 
         // タイトルと本文のデフォルト設定
         String title = (note.getTitle() == null || note.getTitle().isBlank()) ? 
@@ -34,15 +32,9 @@ public class NoteService {
         String content = Optional.ofNullable(note.getContent())
                                .map(String::trim)
                                .orElse("");
-//        // 変更前
-//        String content = note.getContent() != null ? note.getContent().trim() : "";
 
         // 既存メモのorder調整
-        List<Note> existingNotes = noteRepository.findByUserOrderByOrderAsc(user);
-        if (!existingNotes.isEmpty()) {
-            existingNotes.forEach(n -> n.setOrder(n.getOrder() + 1));
-            noteRepository.saveAll(existingNotes);
-        }
+        noteRepository.incrementAllOrdersByUser(user.getId());
 
         // 新規メモの作成
         Note newNote = Note.builder()
