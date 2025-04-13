@@ -15,12 +15,12 @@ public class NoteController {
         this.noteService = noteService;
     }
 
-//    @GetMapping
-//    public String showNoteList(Model model) {
-//        model.addAttribute("notes", noteService.getAllNotes());
-//        return "notes/list";  // Thymeleafテンプレートを指定
-//    }
-//
+    @GetMapping
+    public String showNoteList(Model model) {
+        model.addAttribute("notes", noteService.getAllNotes());
+        return "notes/list";  // Thymeleafテンプレートを指定
+    }
+
 //    @PostMapping
 //    public String createNote(@ModelAttribute Note note) {
 //        noteService.saveNote(note);

@@ -5,5 +5,5 @@ INSERT INTO users (id, username, password) VALUES
 -- メモデータにuser_idを指定
 INSERT INTO note (title, content, user_id, last_edited, sort_order) VALUES
     ('買い物リスト', '卵・牛乳', 1, CURRENT_TIMESTAMP, 1),
-    ('プロジェクトタスク', 'API実装', 1, CURRENT_TIMESTAMP, 2),
-    ('アイデア', '新機能のUI', 2, CURRENT_TIMESTAMP, 1);
+    ('プロジェクトタスク', 'API実装', 2, CURRENT_TIMESTAMP, 2),
+    ('アイデア', '新機能のUI', 3, CURRENT_TIMESTAMP, 3);

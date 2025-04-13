@@ -5,6 +5,20 @@ spring:
     username: sa
     password: ""
 
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        trace: true
+        web-allow-others: true
+#  h2:
+#    console:
+#      enabled: true    # H2 Console を有効化
+#      path: /h2-console # SecurityConfig で許可したパスと合わせる
+#      settings:
+#        web-allow-others: false # テストでは通常 false
+
   jpa:
     hibernate:
       ddl-auto: create-drop
