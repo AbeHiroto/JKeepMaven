@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Optional;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+//import org.springframework.security.core.Authentication;
+//import org.springframework.security.core.context.SecurityContextHolder;
+//import org.springframework.security.core.userdetails.UserDetails;
+//import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import com.abehiroto.jkeep.bean.Note;
 import com.abehiroto.jkeep.bean.User;
-import com.abehiroto.jkeep.repository.UserRepository;
+// import com.abehiroto.jkeep.repository.UserRepository;
 import com.abehiroto.jkeep.repository.NoteRepository;
 import com.abehiroto.jkeep.dto.NoteSummaryDTO;
 
@@ -23,11 +23,11 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class NoteService {
     private final NoteRepository noteRepository;
-    private final UserRepository userRepository;
+    // private final UserRepository userRepository;
 
-    public NoteService(NoteRepository noteRepository, UserRepository userRepository) {
+    public NoteService(NoteRepository noteRepository) {
         this.noteRepository = noteRepository;
-        this.userRepository = userRepository; // <-- ③ 受け取ったインスタンスをフィールドに代入
+        // this.userRepository = userRepository;
     }
     
     public Note saveNewNote(Note note, User user) {
@@ -62,13 +62,14 @@ public class NoteService {
      * 現在認証されているユーザーのノート一覧（サマリー）を取得する。
      * @return ノートサマリーDTOのリスト
      */
-    public List<NoteSummaryDTO> getAllNotes() {
-        // 1. 認証ユーザーのユーザー名を取得
-        String username = getCurrentUsername();
-
-        // 2. ユーザー名から User エンティティを取得
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    public List<NoteSummaryDTO> getAllNotes(User user) {
+    	  // 認証ユーザーの取得はController層に移動
+//        // 1. 認証ユーザーのユーザー名を取得
+//        String username = getCurrentUsername();
+//
+//        // 2. ユーザー名から User エンティティを取得
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         // 3. ユーザーに紐づくノートを order 昇順で取得
         List<Note> notes = noteRepository.findByUserOrderByOrderAsc(user);
@@ -115,26 +116,26 @@ public class NoteService {
                 .build();
     }
 
-    /**
-     * Spring Security コンテキストから現在のユーザー名を取得する。
-     */
-    private String getCurrentUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
-            // 適切な例外処理またはエラーハンドリング
-            throw new IllegalStateException("User not authenticated");
-        }
-
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof UserDetails) {
-            return ((UserDetails) principal).getUsername();
-        } else if (principal instanceof String) {
-            // Principal が単なる文字列の場合 (例: テストなど)
-            return (String) principal;
-        }
-        // 想定外の Principal タイプの場合
-        // ここは User エンティティを直接 Principal として使う実装など、
-        // アプリケーションの認証実装に合わせて調整が必要
-        throw new IllegalStateException("Cannot determine username from principal type: " + principal.getClass());
-    }
+//    /**
+//     * Spring Security コンテキストから現在のユーザー名を取得する。
+//     */
+//    private String getCurrentUsername() {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+//            // 適切な例外処理またはエラーハンドリング
+//            throw new IllegalStateException("User not authenticated");
+//        }
+//
+//        Object principal = authentication.getPrincipal();
+//        if (principal instanceof UserDetails) {
+//            return ((UserDetails) principal).getUsername();
+//        } else if (principal instanceof String) {
+//            // Principal が単なる文字列の場合 (例: テストなど)
+//            return (String) principal;
+//        }
+//        // 想定外の Principal タイプの場合
+//        // ここは User エンティティを直接 Principal として使う実装など、
+//        // アプリケーションの認証実装に合わせて調整が必要
+//        throw new IllegalStateException("Cannot determine username from principal type: " + principal.getClass());
+//    }
 }

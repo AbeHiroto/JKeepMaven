@@ -1,7 +1,7 @@
 package com.abehiroto.jkeep.bean;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
+// import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class Note {
