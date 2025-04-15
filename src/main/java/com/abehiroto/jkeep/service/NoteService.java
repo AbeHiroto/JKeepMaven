@@ -63,13 +63,7 @@ public class NoteService {
      * @return ノートサマリーDTOのリスト
      */
     public List<NoteSummaryDTO> getAllNotes(User user) {
-    	  // 認証ユーザーの取得はController層に移動
-//        // 1. 認証ユーザーのユーザー名を取得
-//        String username = getCurrentUsername();
-//
-//        // 2. ユーザー名から User エンティティを取得
-//        User user = userRepository.findByUsername(username)
-//                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    	// 認証ユーザーの取得はController層に移動
 
         // 3. ユーザーに紐づくノートを order 昇順で取得
         List<Note> notes = noteRepository.findByUserOrderByOrderAsc(user);
@@ -82,10 +76,6 @@ public class NoteService {
 
     // --- Helper Methods ---
 
-    /**
-     * Note エンティティを NoteSummaryDTO に変換する。
-     * sort_order に応じて content を加工する。
-     */
     private NoteSummaryDTO convertToDto(Note note) {
         String summaryContent;
         String originalContent = Optional.ofNullable(note.getContent()).orElse(""); // Nullチェック

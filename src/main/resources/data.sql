@@ -1,6 +1,7 @@
 INSERT INTO users (id, username, password) VALUES 
     (1, 'user1', '$2a$10$xLH7A3...'),  -- パスワードはBCryptでハッシュ化
-    (2, 'user2', '$2a$10$yTKR8B...');
+    (2, 'user2', '$2a$10$yTKR8B...'),
+    (3, 'user3', '$2a$10$abcdef...');
 
 -- メモデータにuser_idを指定
 INSERT INTO note (title, content, user_id, last_edited, sort_order) VALUES

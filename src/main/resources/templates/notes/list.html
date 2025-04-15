@@ -2,13 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Todo List</title>
-</head>
+    <title>My Notes</title> </head>
 <body>
     <h1>My Notes</h1>
     <div th:each="note : ${notes}">
-        <h3 th:text="${note.title}"></h3>
-        <p th:text="${note.content}"></p>
-    </div>
-</body>
+        <h3 th:text="${note.title}">Note Title</h3> <p th:text="${note.summaryContent}">Note Summary/Content</p>
+
+        <hr> </div>
+
+    </body>
 </html>
