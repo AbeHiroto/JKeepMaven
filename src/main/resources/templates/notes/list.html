@@ -1,14 +1,38 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>My Notes</title> </head>
+    <title>My Notes</title>
+    <style>
+        /* ... (スタイル定義は省略) ... */
+    </style>
+</head>
 <body>
-    <h1>My Notes</h1>
-    <div th:each="note : ${notes}">
-        <h3 th:text="${note.title}">Note Title</h3> <p th:text="${note.summaryContent}">Note Summary/Content</p>
+    <div class="container">
+        <div id="main-area">
+            <h1>My Notes</h1>
+            <p th:if="${username}">ようこそ, <span th:text="${username}"></span> さん</p>
 
-        <hr> </div>
+            <th:block th:each="note : ${notes}" th:if="${note.order == 0}">
+                <form id="main-note-form">
+                    <input type="hidden" id="main-note-id" name="id" th:value="${note.id}" />
+                    <div>
+                        <label for="main-note-title">タイトル:</label><br>
+                        <input type="text" id="main-note-title" name="title" th:value="${note.title}" />
+                    </div>
+                    <div>
+                        <label for="main-note-content">本文:</label><br>
+                        <textarea id="main-note-content" name="content" th:text="${note.summaryContent}"></textarea>
+                    </div>
+                </form>
+            </th:block>
 
-    </body>
+            <div th:if="${#lists.isEmpty(notes)}">
+                <p>ノートがありません。最初のノートを作成しましょう。</p>
+                </div>
+            </div>
+        <div id="sidebar">
+            </div>
+    </div>
+</body>
 </html>

@@ -86,15 +86,15 @@ public class NoteService {
         } else {
             // order が 0 以外なら加工 (例: 最初の1行、または50文字)
             // 例1: 最初の1行を取得
-             summaryContent = originalContent.lines().findFirst().orElse("");
+            // summaryContent = originalContent.lines().findFirst().orElse("");
 
-            // 例2: 最初の50文字を取得 (+ "..." を付ける)
-            // int maxLength = 50;
-            // if (originalContent.length() <= maxLength) {
-            //     summaryContent = originalContent;
-            // } else {
-            //     summaryContent = originalContent.substring(0, maxLength) + "...";
-            // }
+            // 例2: 最初の28文字を取得 (+ "..." を付ける)
+             int maxLength = 28;
+             if (originalContent.length() <= maxLength) {
+                 summaryContent = originalContent;
+             } else {
+                 summaryContent = originalContent.substring(0, maxLength) + "...";
+             }
         }
 
         return NoteSummaryDTO.builder()
