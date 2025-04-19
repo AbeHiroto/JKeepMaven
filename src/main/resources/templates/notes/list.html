@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>My Notes</title>
-    <style>
-        /* ... (スタイル定義は省略) ... */
-    </style>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <div class="container">
+        <!-- メインエリア（sort_order = 0のノート） -->
         <div id="main-area">
-            <h1>My Notes</h1>
+            <h1>編集エリア</h1>
             <p th:if="${username}">ようこそ, <span th:text="${username}"></span> さん</p>
 
             <th:block th:each="note : ${notes}" th:if="${note.order == 0}">
@@ -29,10 +28,32 @@
 
             <div th:if="${#lists.isEmpty(notes)}">
                 <p>ノートがありません。最初のノートを作成しましょう。</p>
+            </div>
+        </div>
+
+        <!-- サイドバー（ノート一覧） -->
+        <div id="sidebar">
+            <h3>ノート一覧</h3>
+            <div th:each="note : ${notes}">
+                <div class="note-summary" th:onclick="'loadNote(' + ${note.id} + ')'" th:id="'note-' + ${note.id}">
+                    <div class="note-title" th:text="${note.title}">タイトル</div>
+                    <div class="note-content-preview"
+                         th:text="${note.summaryContent.length() > 24} ? ${note.summaryContent.substring(0, 24)} + '…' : ${note.summaryContent}">
+                        本文プレビュー
+                    </div>
                 </div>
             </div>
-        <div id="sidebar">
-            </div>
+        </div>
     </div>
+
+    <script>
+        // 今後追加するノート読み込み処理
+        function loadNote(noteId) {
+            // フロントエンドだけならフォームに値を埋めるだけ
+            // または、Ajaxで該当ノートを取得して差し替えることも可
+            console.log("ノートID " + noteId + " を読み込みます");
+            // 実装予定
+        }
+    </script>
 </body>
 </html>

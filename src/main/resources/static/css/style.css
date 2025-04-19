@@ -1,0 +1,61 @@
+.container {
+            display: flex;
+            height: 100vh;
+        }
+
+        #main-area {
+            flex: 3;
+            padding: 20px;
+            overflow-y: auto;
+        }
+		
+		#main-note-form {
+		    max-width: 800px;
+		    margin: 0 auto;
+		}
+		
+		/* タイトル入力欄 */
+		#main-note-title {
+		    width: 100%;         /* 横幅いっぱいに広げる */
+		    font-size: 2.4em;    /* 少し大きめの文字 */
+		    padding: 8px;
+		    margin-bottom: 10px;
+		}
+
+		/* 本文入力欄 */
+		#main-note-content {
+		    width: 100%;         /* 横幅いっぱいに広げる */
+		    height: 300px;       /* 高さを指定（必要に応じて調整） */
+		    font-size: 1.6em;
+		    padding: 8px;
+		    line-height: 1.4;
+		    resize: vertical;    /* ユーザーが縦方向にサイズ変更できるように */
+		}
+
+
+        #sidebar {
+            flex: 1;
+            background-color: #f0f0f0;
+            border-left: 1px solid #ccc;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .note-summary {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        .note-summary:hover {
+            background-color: #e0e0e0;
+        }
+
+        .note-title {
+            font-weight: bold;
+        }
+
+        .note-content-preview {
+            color: #666;
+            font-size: 0.9em;
+        }

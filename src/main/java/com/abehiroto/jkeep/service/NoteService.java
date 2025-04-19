@@ -16,6 +16,7 @@ import com.abehiroto.jkeep.bean.User;
 // import com.abehiroto.jkeep.repository.UserRepository;
 import com.abehiroto.jkeep.repository.NoteRepository;
 import com.abehiroto.jkeep.dto.NoteSummaryDTO;
+import com.abehiroto.jkeep.dto.NoteDtoAssembler;
 
 import jakarta.transaction.Transactional;
 
@@ -70,41 +71,44 @@ public class NoteService {
 
         // 4. Note リストを NoteSummaryDTO リストに変換（コンテンツ加工含む）
         return notes.stream()
-                .map(this::convertToDto) // 各 Note を DTO に変換
+                .map(NoteDtoAssembler::toDto)
                 .collect(Collectors.toList());
+//        return notes.stream()
+//                .map(this::convertToDto) // 各 Note を DTO に変換
+//                .collect(Collectors.toList());
     }
 
     // --- Helper Methods ---
 
-    private NoteSummaryDTO convertToDto(Note note) {
-        String summaryContent;
-        String originalContent = Optional.ofNullable(note.getContent()).orElse(""); // Nullチェック
-
-        if (note.getOrder() != null && note.getOrder() == 0) {
-            // order が 0 なら全文
-            summaryContent = originalContent;
-        } else {
-            // order が 0 以外なら加工 (例: 最初の1行、または50文字)
-            // 例1: 最初の1行を取得
-            // summaryContent = originalContent.lines().findFirst().orElse("");
-
-            // 例2: 最初の28文字を取得 (+ "..." を付ける)
-             int maxLength = 28;
-             if (originalContent.length() <= maxLength) {
-                 summaryContent = originalContent;
-             } else {
-                 summaryContent = originalContent.substring(0, maxLength) + "...";
-             }
-        }
-
-        return NoteSummaryDTO.builder()
-                .id(note.getId())
-                .title(note.getTitle())
-                .summaryContent(summaryContent) // 加工後のコンテンツ
-                .lastEdited(note.getLastEdited())
-                .order(note.getOrder())
-                .build();
-    }
+//    private NoteSummaryDTO convertToDto(Note note) {
+//        String summaryContent;
+//        String originalContent = Optional.ofNullable(note.getContent()).orElse(""); // Nullチェック
+//
+//        if (note.getOrder() != null && note.getOrder() == 0) {
+//            // order が 0 なら全文
+//            summaryContent = originalContent;
+//        } else {
+//            // order が 0 以外なら加工 (例: 最初の1行、または50文字)
+//            // 例1: 最初の1行を取得
+//            // summaryContent = originalContent.lines().findFirst().orElse("");
+//
+//            // 例2: 最初の28文字を取得 (+ "..." を付ける)
+//             int maxLength = 28;
+//             if (originalContent.length() <= maxLength) {
+//                 summaryContent = originalContent;
+//             } else {
+//                 summaryContent = originalContent.substring(0, maxLength) + "...";
+//             }
+//        }
+//
+//        return NoteSummaryDTO.builder()
+//                .id(note.getId())
+//                .title(note.getTitle())
+//                .summaryContent(summaryContent) // 加工後のコンテンツ
+//                .lastEdited(note.getLastEdited())
+//                .order(note.getOrder())
+//                .build();
+//    }
 
 //    /**
 //     * Spring Security コンテキストから現在のユーザー名を取得する。
