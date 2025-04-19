@@ -9,7 +9,7 @@
     <div class="container">
         <!-- メインエリア（sort_order = 0のノート） -->
         <div id="main-area">
-            <h1>My Notes</h1>
+            <h1>編集エリア</h1>
             <p th:if="${username}">ようこそ, <span th:text="${username}"></span> さん</p>
 
             <th:block th:each="note : ${notes}" th:if="${note.order == 0}">
