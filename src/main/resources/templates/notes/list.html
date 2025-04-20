@@ -7,31 +7,43 @@
 </head>
 <body>
     <div class="container">
-        <!-- メインエリア（sort_order = 0のノート） -->
-        <div id="main-area">
-            <h1>編集エリア</h1>
-            <p th:if="${username}">ようこそ, <span th:text="${username}"></span> さん</p>
+		<div id="main-content">
+			<div id="main-area">
+			    <h1>編集エリア</h1>
+			    <p th:if="${username}">ようこそ, <span th:text="${username}"></span> さん</p>
 
-            <th:block th:each="note : ${notes}" th:if="${note.order == 0}">
-                <form id="main-note-form">
-                    <input type="hidden" id="main-note-id" name="id" th:value="${note.id}" />
-                    <div>
-                        <label for="main-note-title">タイトル:</label><br>
-                        <input type="text" id="main-note-title" name="title" th:value="${note.title}" />
-                    </div>
-                    <div>
-                        <label for="main-note-content">本文:</label><br>
-                        <textarea id="main-note-content" name="content" th:text="${note.summaryContent}"></textarea>
-                    </div>
-                </form>
-            </th:block>
+			    <th:block th:each="note : ${notes}" th:if="${note.order == 0}">
+			        <form id="main-note-form">
+			            <input type="hidden" id="main-note-id" name="id" th:value="${note.id}" />
+			            <div>
+			                <label for="main-note-title">タイトル:</label><br>
+			                <input type="text" id="main-note-title" name="title" th:value="${note.title}" class="note-title-input" />
+			            </div>
+			            <div>
+			                <label for="main-note-content">本文:</label><br>
+			                <textarea id="main-note-content" name="content" class="note-content-textarea" th:text="${note.summaryContent}"></textarea>
+			            </div>
+			        </form>
+			    </th:block>
 
-            <div th:if="${#lists.isEmpty(notes)}">
-                <p>ノートがありません。最初のノートを作成しましょう。</p>
-            </div>
-        </div>
+			    <div th:if="${#lists.isEmpty(notes)}">
+			        <p>ノートがありません。最初のノートを作成しましょう。</p>
+			    </div>
+			</div>
 
-        <!-- サイドバー（ノート一覧） -->
+			<div id="new-note-area" style="display: none;">
+			    <h2>新規ノート作成</h2>
+			    <form id="new-note-form">
+			        <label for="new-title">タイトル:</label><br>
+			        <input type="text" id="new-title" name="title" class="note-title-input"><br>
+			        <label for="new-content">本文:</label><br>
+			        <textarea id="new-content" name="content" class="note-content-textarea"></textarea><br>
+			        <button type="button" id="save-new-note">保存</button>
+			        <button type="button" id="cancel-new-note">閉じる</button>
+			    </form>
+			</div>
+		</div>
+
         <div id="sidebar">
             <h3>ノート一覧</h3>
             <div th:each="note : ${notes}">
@@ -43,6 +55,7 @@
                     </div>
                 </div>
             </div>
+			<button id="create-note-button">＋ 新規ノート</button>
         </div>
     </div>
 
@@ -55,5 +68,6 @@
             // 実装予定
         }
     </script>
+<script src="/js/notes.js"></script>
 </body>
 </html>
