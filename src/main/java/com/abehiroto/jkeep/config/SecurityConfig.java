@@ -11,6 +11,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+
+import jakarta.servlet.http.HttpServletResponse;
+
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
@@ -24,6 +27,16 @@ public class SecurityConfig {
             .requestMatchers("/h2-console/**", "/login", "/static/**").permitAll()
             .anyRequest().authenticated()
         )
+        .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, authException) -> {
+                    // APIパスなら401、そうでなければデフォルト動作（リダイレクト）
+                    if (request.getRequestURI().startsWith("/api/")) {
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                    } else {
+                        response.sendRedirect("/login"); // 通常のフォームログインへ
+                    }
+                })
+            )
         .csrf(csrf -> csrf
             .ignoringRequestMatchers("/h2-console/**", "/notes") // CSRF無効化
         )
