@@ -11,6 +11,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+
+import jakarta.servlet.http.HttpServletResponse;
+
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
@@ -19,27 +22,34 @@ public class SecurityConfig {
     @SuppressWarnings("removal")
 	@Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//            .authorizeHttpRequests(auth -> auth
-//                .requestMatchers("/login", "/static/**").permitAll()  // 認証不要パス
-//                .anyRequest().authenticated()  // それ以外は要認証
-//            )
-//            .formLogin(form -> form
-//                .loginPage("/login")  // カスタムログインページ
-//                .defaultSuccessUrl("/notes")  // ログイン成功時の遷移先
-//            );
     	http
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/h2-console/**").permitAll() // H2コンソールを認証除外
+            .requestMatchers("/h2-console/**", "/login", "/static/**").permitAll()
             .anyRequest().authenticated()
         )
+        .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, authException) -> {
+                    // APIパスなら401、そうでなければデフォルト動作（リダイレクト）
+                    if (request.getRequestURI().startsWith("/api/")) {
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                    } else {
+                        response.sendRedirect("/login"); // 通常のフォームログインへ
+                    }
+                })
+            )
         .csrf(csrf -> csrf
-            .ignoringRequestMatchers("/h2-console/**") // CSRF無効化
+            .ignoringRequestMatchers("/h2-console/**", "/notes") // CSRF無効化
         )
         .headers(headers -> headers
         		.frameOptions(options -> options.sameOrigin()) // H2コンソール用に sameOrigin を許可 (推奨)
+        
         )
-    	.httpBasic(withDefaults());
+        .formLogin(form -> form
+        	    .loginPage("/login")
+        	    .defaultSuccessUrl("/notes", true)
+        	    .permitAll()
+        );
+//     	.httpBasic(withDefaults());
         return http.build();
     }
     
