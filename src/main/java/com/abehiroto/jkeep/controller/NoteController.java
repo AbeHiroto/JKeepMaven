@@ -101,26 +101,4 @@ public class NoteController {
             return ResponseEntity.ok().build(); // 必要に応じてsavedNoteの情報を返す
         }
     }
-
-
-//    // --- @AuthenticationPrincipalで置き換え ---
-//    private User getCurrentAuthenticatedUser() {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
-//            throw new IllegalStateException("User not authenticated"); // またはログインページへリダイレクトなど
-//        }
-//
-//        String username;
-//        Object principal = authentication.getPrincipal();
-//        if (principal instanceof UserDetails) {
-//            username = ((UserDetails) principal).getUsername();
-//        } else if (principal instanceof String) {
-//            username = (String) principal;
-//        } else {
-//            throw new IllegalStateException("Unexpected principal type: " + principal.getClass());
-//        }
-//
-//        return userRepository.findByUsername(username)
-//               .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-//    }
 }
