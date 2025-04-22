@@ -35,12 +35,15 @@
 
 			<div id="new-note-area" style="display: none;">
 			    <h2>新規ノート作成</h2>
-			    <form id="new-note-form">
+			    <form id="new-note-form" th:action="@{/notes}" method="post" th:object="${newNote}">
+			        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 			        <label for="new-title">タイトル:</label><br>
-			        <input type="text" id="new-title" name="title" class="note-title-input"><br>
+			        <input type="text" id="new-title" th:field="*{title}" class="note-title-input"><br>
+
 			        <label for="new-content">本文:</label><br>
-			        <textarea id="new-content" name="content" class="note-content-textarea"></textarea><br>
-			        <button type="button" id="save-new-note">保存</button>
+			        <textarea id="new-content" th:field="*{content}" class="note-content-textarea"></textarea><br>
+
+			        <button type="submit">保存</button>
 			        <button type="button" id="cancel-new-note">閉じる</button>
 			    </form>
 			</div>
