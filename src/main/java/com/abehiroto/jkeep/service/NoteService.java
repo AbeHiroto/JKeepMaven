@@ -2,6 +2,7 @@ package com.abehiroto.jkeep.service;
 
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Optional;
@@ -11,9 +12,10 @@ import java.util.Optional;
 //import org.springframework.security.core.userdetails.UserDetails;
 //import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
 import com.abehiroto.jkeep.bean.Note;
 import com.abehiroto.jkeep.bean.User;
-// import com.abehiroto.jkeep.repository.UserRepository;
+import com.abehiroto.jkeep.repository.UserRepository;
 import com.abehiroto.jkeep.repository.NoteRepository;
 import com.abehiroto.jkeep.dto.NoteSummaryDTO;
 import com.abehiroto.jkeep.dto.NoteDtoAssembler;
@@ -24,11 +26,11 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class NoteService {
     private final NoteRepository noteRepository;
-    // private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    public NoteService(NoteRepository noteRepository) {
+    public NoteService(NoteRepository noteRepository, UserRepository userRepository) {
         this.noteRepository = noteRepository;
-        // this.userRepository = userRepository;
+        this.userRepository = userRepository;
     }
     
     public Note saveNewNote(Note note, User user) {
@@ -59,6 +61,38 @@ public class NoteService {
         return noteRepository.save(newNote);
     }
     
+    public Optional<Note> getNoteByIdAndUsername(Long id, String username) {
+        return noteRepository.findByIdAndUserUsername(id, username);
+    }
+
+    
+    public List<Note> getAllNotesByUsername(String username) {
+        return userRepository.findByUsername(username)
+            .map(noteRepository::findByUserOrderByOrderAsc)
+            .orElse(Collections.emptyList());
+    }
+    
+    public Note editNote(Long noteId, String newTitle, String newContent, String username) {
+        Note note = noteRepository.findById(noteId)
+            .orElseThrow(() -> new IllegalArgumentException("ノートが存在しません"));
+
+        // 所有者の確認
+        if (!note.getUser().getUsername().equals(username)) {
+            throw new SecurityException("このノートを編集する権限がありません");
+        }
+
+        note.setTitle(newTitle);
+        note.setContent(newContent);
+        return noteRepository.save(note);
+    }
+    
+    public List<Note> findByUserOrderByOrderAsc(String username) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("ユーザーが見つかりません"));
+        return noteRepository.findByUserOrderByOrderAsc(user);
+    }
+
+    
     public List<NoteSummaryDTO> getAllNotes(User user) {
 
         // 3. ユーザーに紐づくノートを order 昇順で取得
@@ -72,4 +106,18 @@ public class NoteService {
 //                .map(this::convertToDto) // 各 Note を DTO に変換
 //                .collect(Collectors.toList());
     }
+    
+    public Note getNoteByIdAndUser(Long id, String username) {
+        return noteRepository.findByIdAndUserUsername(id, username)
+            .orElseThrow(() -> new IllegalArgumentException("該当するノートが見つかりません"));
+    }
+
+    public List<NoteSummaryDTO> getNotesForUser(String username) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("ユーザーが見つかりません"));
+        return noteRepository.findByUserOrderByOrderAsc(user).stream()
+            .map(NoteDtoAssembler::toDto)
+            .collect(Collectors.toList());
+    }
+
 }

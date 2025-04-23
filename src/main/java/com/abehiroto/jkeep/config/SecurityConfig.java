@@ -38,7 +38,7 @@ public class SecurityConfig {
                 })
             )
         .csrf(csrf -> csrf
-            .ignoringRequestMatchers("/h2-console/**", "/notes") // CSRF無効化
+            .ignoringRequestMatchers("/h2-console/**", "/notes", "/notes/list-data") // CSRF無効化
         )
         .headers(headers -> headers
         		.frameOptions(options -> options.sameOrigin()) // H2コンソール用に sameOrigin を許可 (推奨)

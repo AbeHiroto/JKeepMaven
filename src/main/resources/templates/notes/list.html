@@ -14,23 +14,25 @@
 			    <h1>編集エリア</h1>
 			    <p th:if="${username}">ようこそ, <span th:text="${username}"></span> さん</p>
 
-			    <th:block th:each="note : ${notes}" th:if="${note.order == 0}">
-			        <form id="main-note-form">
-			            <input type="hidden" id="main-note-id" name="id" th:value="${note.id}" />
-			            <div>
-			                <label for="main-note-title">タイトル:</label><br>
-			                <input type="text" id="main-note-title" name="title" th:value="${note.title}" class="note-title-input" />
-			            </div>
-			            <div>
-			                <label for="main-note-content">本文:</label><br>
-			                <textarea id="main-note-content" name="content" class="note-content-textarea" th:text="${note.summaryContent}"></textarea>
-			            </div>
-			        </form>
-			    </th:block>
+				<th:block th:if="${selectedNote != null}">
+				    <form id="main-note-form" th:action="@{/notes/edit}" method="post">
+				        <input type="hidden" name="id" th:value="${selectedNote.id}" />
+				        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+				        <div>
+				            <label for="main-note-title">タイトル:</label><br>
+				            <input type="text" id="main-note-title" name="title" th:value="${selectedNote.title}" class="note-title-input" />
+				        </div>
+				        <div>
+				            <label for="main-note-content">本文:</label><br>
+				            <textarea id="main-note-content" name="content" class="note-content-textarea" th:text="${selectedNote.content}"></textarea>
+				        </div>
+				        <button type="submit">更新</button>
+				    </form>
+				</th:block>
 
-			    <div th:if="${#lists.isEmpty(notes)}">
-			        <p>ノートがありません。最初のノートを作成しましょう。</p>
-			    </div>
+				<div th:if="${#lists.isEmpty(notes)} and ${selectedNote == null}">
+				    <p>ノートがありません。最初のノートを作成しましょう。</p>
+				</div>>
 			</div>
 
 			<div id="new-note-area" style="display: none;">
@@ -51,15 +53,17 @@
 
         <div id="sidebar">
             <h3>ノート一覧</h3>
-            <div th:each="note : ${notes}">
-                <div class="note-summary" th:onclick="'loadNote(' + ${note.id} + ')'" th:id="'note-' + ${note.id}">
-                    <div class="note-title" th:text="${note.title}">タイトル</div>
-                    <div class="note-content-preview"
-                         th:text="${note.summaryContent.length() > 24} ? ${note.summaryContent.substring(0, 24)} + '…' : ${note.summaryContent}">
-                        本文プレビュー
-                    </div>
-                </div>
-            </div>
+			<div id="sidebar-notes">
+				<div th:each="note : ${notes}">
+				    <div class="note-summary" th:onclick="'loadNote(' + ${note.id} + ')'" th:id="'note-' + ${note.id}">
+				        <div class="note-title" th:text="${note.title}">タイトル</div>
+				        <div class="note-content-preview"
+				             th:text="${note.summaryContent.length() > 24} ? ${note.summaryContent.substring(0, 24)} + '…' : ${note.summaryContent}">
+				            本文プレビュー
+				        </div>
+				    </div>
+				</div>
+			</div>
 			<button id="create-note-button">＋ 新規ノート</button>
         </div>
     </div>

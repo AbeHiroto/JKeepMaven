@@ -3,6 +3,8 @@ package com.abehiroto.jkeep.controller;
 import com.abehiroto.jkeep.bean.Note;
 import com.abehiroto.jkeep.bean.User;
 import com.abehiroto.jkeep.dto.NoteCreateRequest;
+import com.abehiroto.jkeep.dto.NoteDetailDTO;
+import com.abehiroto.jkeep.dto.NoteDtoAssembler;
 import com.abehiroto.jkeep.dto.NoteSummaryDTO;
 import com.abehiroto.jkeep.service.NoteService;
 import com.abehiroto.jkeep.repository.UserRepository;
@@ -10,7 +12,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 //import org.springframework.security.core.Authentication;
 //import org.springframework.security.core.context.SecurityContextHolder;
@@ -48,6 +53,14 @@ public class NoteController {
         model.addAttribute("username", currentUser.getUsername());
         model.addAttribute("newNote", new Note());
         return "notes/list";
+    }
+    
+    // URLから直接個別のノートに飛ぶときにサイドバーがロードされていないときに使用
+    @GetMapping("/list-data")
+    @ResponseBody
+    public List<NoteSummaryDTO> getNoteList(Principal principal) {
+        String username = principal.getName();
+        return noteService.getNotesForUser(username);
     }
 
     @PostMapping
@@ -101,4 +114,22 @@ public class NoteController {
             return ResponseEntity.ok().build(); // 必要に応じてsavedNoteの情報を返す
         }
     }
+    
+    @GetMapping("/{id}")
+    public String showNote(@PathVariable Long id, Model model, Principal principal) {
+        String username = principal.getName();
+
+        Note note = noteService.getNoteByIdAndUser(id, username);
+        NoteDetailDTO selectedNote = NoteDtoAssembler.toDetailDto(note);
+
+        List<NoteSummaryDTO> noteList = noteService.getNotesForUser(username);
+
+        model.addAttribute("selectedNote", selectedNote);
+        model.addAttribute("noteList", noteList);
+        
+        model.addAttribute("newNote", new Note());
+
+        return "notes/list";
+    }
+
 }

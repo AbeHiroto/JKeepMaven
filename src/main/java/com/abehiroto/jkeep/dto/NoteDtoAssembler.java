@@ -26,4 +26,14 @@ public class NoteDtoAssembler {
                 .order(note.getOrder())
                 .build();
     }
+	
+    public static NoteDetailDTO toDetailDto(Note note) {
+        return NoteDetailDTO.builder()
+                .id(note.getId())
+                .title(note.getTitle())
+                .content(note.getContent()) // 全文をそのまま渡す
+                .lastEdited(note.getLastEdited())
+                .order(note.getOrder())
+                .build();
+    }
 }

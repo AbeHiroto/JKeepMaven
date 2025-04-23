@@ -3,6 +3,7 @@ package com.abehiroto.jkeep.repository;
 // import jakarta.transaction.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 // ※誤ったインポート！！※import org.springframework.data.jdbc.repository.query.Query;
@@ -22,4 +23,7 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     int incrementAllOrdersByUser(@Param("userId") Long userId);
     
     List<Note> findByUserOrderByOrderAsc(User user);
+    
+    Optional<Note> findByIdAndUserUsername(Long id, String username);
+
 }
