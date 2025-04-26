@@ -9,7 +9,7 @@ public class NoteDtoAssembler {
         String originalContent = Optional.ofNullable(note.getContent()).orElse("");
         String summaryContent;
 
-        if (note.getOrder() != null && note.getOrder() == 0) {
+        if (note.getSortOrder() != null && note.getSortOrder() == 0) {
             summaryContent = originalContent;
         } else {
             int maxLength = 28;
@@ -23,7 +23,7 @@ public class NoteDtoAssembler {
                 .title(note.getTitle())
                 .summaryContent(summaryContent)
                 .lastEdited(note.getLastEdited())
-                .order(note.getOrder())
+                .order(note.getSortOrder())
                 .build();
     }
 	
@@ -33,7 +33,7 @@ public class NoteDtoAssembler {
                 .title(note.getTitle())
                 .content(note.getContent()) // 全文をそのまま渡す
                 .lastEdited(note.getLastEdited())
-                .order(note.getOrder())
+                .order(note.getSortOrder())
                 .build();
     }
 }

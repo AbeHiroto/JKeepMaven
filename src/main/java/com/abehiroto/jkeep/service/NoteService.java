@@ -54,7 +54,7 @@ public class NoteService {
             .title(title)
             .content(content)
             .user(user)
-            .order(0)
+            .sortOrder(0)
             .lastEdited(LocalDateTime.now())
             .build();
 
@@ -68,7 +68,7 @@ public class NoteService {
     
     public List<Note> getAllNotesByUsername(String username) {
         return userRepository.findByUsername(username)
-            .map(noteRepository::findByUserOrderByOrderAsc)
+            .map(noteRepository::findByUserOrderBySortOrderAsc)
             .orElse(Collections.emptyList());
     }
     
@@ -89,14 +89,15 @@ public class NoteService {
     public List<Note> findByUserOrderByOrderAsc(String username) {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new IllegalArgumentException("ユーザーが見つかりません"));
-        return noteRepository.findByUserOrderByOrderAsc(user);
+        return noteRepository.findByUserOrderBySortOrderAsc(user);
     }
 
     
+    // 初期画面読み込み時用
     public List<NoteSummaryDTO> getAllNotes(User user) {
 
         // 3. ユーザーに紐づくノートを order 昇順で取得
-        List<Note> notes = noteRepository.findByUserOrderByOrderAsc(user);
+        List<Note> notes = noteRepository.findByUserOrderBySortOrderAsc(user);
 
         // 4. Note リストを NoteSummaryDTO リストに変換（コンテンツ加工含む）
         return notes.stream()
@@ -107,17 +108,22 @@ public class NoteService {
 //                .collect(Collectors.toList());
     }
     
-    public Note getNoteByIdAndUser(Long id, String username) {
-        return noteRepository.findByIdAndUserUsername(id, username)
-            .orElseThrow(() -> new IllegalArgumentException("該当するノートが見つかりません"));
+    public Optional<Note> findFirstNoteBySortOrder(User user) {
+        return noteRepository.findFirstByUserOrderBySortOrderAsc(user);
     }
 
+    // ノート選択時に一覧を取得
     public List<NoteSummaryDTO> getNotesForUser(String username) {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new IllegalArgumentException("ユーザーが見つかりません"));
-        return noteRepository.findByUserOrderByOrderAsc(user).stream()
+        return noteRepository.findByUserOrderBySortOrderAsc(user).stream()
             .map(NoteDtoAssembler::toDto)
             .collect(Collectors.toList());
+    }
+    
+    public Note getNoteByIdAndUser(Long id, String username) {
+        return noteRepository.findByIdAndUserUsername(id, username)
+            .orElseThrow(() -> new IllegalArgumentException("該当するノートが見つかりません"));
     }
 
 }

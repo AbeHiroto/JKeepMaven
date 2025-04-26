@@ -57,7 +57,7 @@ class NoteServiceTest {
 	        Note result = noteService.saveNewNote(newNote, user);
 	        
 	        assertAll(
-	            () -> assertEquals(0, result.getOrder()),
+	            () -> assertEquals(0, result.getSortOrder()),
 	            () -> assertEquals(user, result.getUser()),
 	            () -> assertNotNull(result.getLastEdited())
 	        );
@@ -166,7 +166,7 @@ class NoteServiceTest {
 	        
 	        // 検証
 	        verify(noteRepository).incrementAllOrdersByUser(user.getId());
-	        assertThat(result.getOrder()).isEqualTo(0);
+	        assertThat(result.getSortOrder()).isEqualTo(0);
 	    }
 //	    @Test
 //	    void shouldIncrementOrderWhenNoteExists() {

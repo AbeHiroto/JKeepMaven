@@ -32,7 +32,7 @@ public class Note {
     
     @Column(name = "sort_order", nullable = false)
     @Builder.Default
-    private Integer order = 0;
+    private Integer sortOrder = 0;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -53,7 +53,7 @@ public class Note {
     
     public void setOrder(Integer order) {
         if (order < 0) throw new IllegalArgumentException("順序は0以上");
-        this.order = order;
+        this.sortOrder = order;
     }
     
     // テスト用ファクトリメソッド
@@ -61,7 +61,7 @@ public class Note {
         return builder()
             .title(title)
             .user(user)
-            .order(0)
+            .sortOrder(0)
             .build();
     }
 }
