@@ -46,10 +46,18 @@ public class NoteController {
         User currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        // --- Service メソッド呼び出し ---
+        // ノート一覧の取得
         List<NoteSummaryDTO> noteSummaries = noteService.getAllNotes(currentUser);
+        
+        // sort_orderが0のノートを取得
+        Optional<Note> firstNoteOpt = noteService.findFirstNoteBySortOrder(currentUser);
+        NoteDetailDTO selectedNote = null;
+        if (firstNoteOpt.isPresent()) {
+            selectedNote = NoteDtoAssembler.toDetailDto(firstNoteOpt.get());
+        }
 
         model.addAttribute("notes", noteSummaries);
+        model.addAttribute("selectedNote", selectedNote);
         model.addAttribute("username", currentUser.getUsername());
         model.addAttribute("newNote", new Note());
         return "notes/list";
@@ -80,6 +88,7 @@ public class NoteController {
         return "redirect:/notes";
     }
     
+    // ※要別ファイル切り出し
     @RestController
     @RequestMapping("/api/notes")
     public class NoteRestController {
