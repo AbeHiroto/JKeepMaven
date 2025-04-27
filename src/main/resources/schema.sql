@@ -19,7 +19,11 @@ CREATE TABLE note (
     last_edited TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     sort_order INT NOT NULL DEFAULT 0,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    pinned BOOLEAN NOT NULL DEFAULT FALSE,
+    color VARCHAR(20),
     CONSTRAINT fk_note_user FOREIGN KEY (user_id) REFERENCES users(id)
+    
 );
 
 -- 複合インデックス追加

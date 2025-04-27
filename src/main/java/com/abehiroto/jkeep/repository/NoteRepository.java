@@ -22,11 +22,17 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     @Query("UPDATE Note n SET n.sortOrder = n.sortOrder + 1 WHERE n.user.id = :userId")
     int incrementAllOrdersByUser(@Param("userId") Long userId);
     
-    List<Note> findByUserOrderBySortOrderAsc(User user);
+    // // active関係なくすべてユーザーのノートすべて取得
+    // List<Note> findByUserOrderBySortOrderAsc(User user);
+    
+    // active=trueのみ取得
+    List<Note> findByUserAndActiveTrueOrderBySortOrderAsc(User user);
     
     Optional<Note> findByIdAndUserUsername(Long id, String username);
     
-    Optional<Note> findFirstByUserOrderBySortOrderAsc(User user);
-
+    // // active関係なく最初のノート取得
+    // Optional<Note> findFirstByUserOrderBySortOrderAsc(User user);
+    
+    Optional<Note> findFirstByUserAndActiveTrueOrderBySortOrderAsc(User user);
 
 }

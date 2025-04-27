@@ -28,9 +28,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 @RequestMapping("/notes")
 public class NoteController {
     private final NoteService noteService;
-    private final UserRepository userRepository; // UserRepository をインジェクション
+    private final UserRepository userRepository;
 
-    // コンストラクタで UserRepository も受け取る
     public NoteController(NoteService noteService, UserRepository userRepository) {
         this.noteService = noteService;
         this.userRepository = userRepository;
@@ -88,6 +87,23 @@ public class NoteController {
         return "redirect:/notes";
     }
     
+    @GetMapping("/{id}")
+    public String showNote(@PathVariable Long id, Model model, Principal principal) {
+        String username = principal.getName();
+
+        Note note = noteService.getNoteByIdAndUser(id, username);
+        NoteDetailDTO selectedNote = NoteDtoAssembler.toDetailDto(note);
+
+        List<NoteSummaryDTO> noteList = noteService.getNotesForUser(username);
+
+        model.addAttribute("selectedNote", selectedNote);
+        model.addAttribute("noteList", noteList);
+        
+        model.addAttribute("newNote", new Note());
+
+        return "notes/list";
+    }
+    
     @PostMapping("/edit")
     public String updateNote(@RequestParam Long id,
                              @RequestParam String title,
@@ -96,7 +112,6 @@ public class NoteController {
         noteService.editNote(id, title, content, principal.getName());
         return "redirect:/notes/" + id;  // 更新後、そのノートにリダイレクト
     }
-
     
     // ※要別ファイル切り出し
     @RestController
@@ -132,23 +147,6 @@ public class NoteController {
 
             return ResponseEntity.ok().build(); // 必要に応じてsavedNoteの情報を返す
         }
-    }
-    
-    @GetMapping("/{id}")
-    public String showNote(@PathVariable Long id, Model model, Principal principal) {
-        String username = principal.getName();
-
-        Note note = noteService.getNoteByIdAndUser(id, username);
-        NoteDetailDTO selectedNote = NoteDtoAssembler.toDetailDto(note);
-
-        List<NoteSummaryDTO> noteList = noteService.getNotesForUser(username);
-
-        model.addAttribute("selectedNote", selectedNote);
-        model.addAttribute("noteList", noteList);
-        
-        model.addAttribute("newNote", new Note());
-
-        return "notes/list";
     }
 
 }
