@@ -37,7 +37,7 @@ public class NoteController {
     }
 
     @GetMapping
-    public String showNoteList(Model model, @AuthenticationPrincipal UserDetails userDetails) { // ★ 引数変更
+    public String showDefaultList(Model model, @AuthenticationPrincipal UserDetails userDetails) { // ★ 引数変更
         // --- 認証ユーザーを取得 (引数から) ---
         if (userDetails == null) {
             throw new IllegalStateException("User details not found in security context.");
@@ -63,7 +63,7 @@ public class NoteController {
         return "notes/list";
     }
     
-    // URLから直接個別のノートに飛ぶときにサイドバーがロードされていないときに使用
+    // 個別のノート読み込み時にサイドバーをロード
     @GetMapping("/list-data")
     @ResponseBody
     public List<NoteSummaryDTO> getNoteList(Principal principal) {
@@ -87,6 +87,16 @@ public class NoteController {
         // --- 一覧表示ページにリダイレクト ---
         return "redirect:/notes";
     }
+    
+    @PostMapping("/edit")
+    public String updateNote(@RequestParam Long id,
+                             @RequestParam String title,
+                             @RequestParam String content,
+                             Principal principal) {
+        noteService.editNote(id, title, content, principal.getName());
+        return "redirect:/notes/" + id;  // 更新後、そのノートにリダイレクト
+    }
+
     
     // ※要別ファイル切り出し
     @RestController
