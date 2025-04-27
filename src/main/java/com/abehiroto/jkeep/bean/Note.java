@@ -34,6 +34,17 @@ public class Note {
     @Builder.Default
     private Integer sortOrder = 0;
     
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean active = true; // true: アクティブ, false: ゴミ箱
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean pinned = false; // true: ピン留め
+
+    @Column(length = 20)
+    private String color; // 例: "red", "blue", "green"
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

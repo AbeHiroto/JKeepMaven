@@ -68,7 +68,7 @@ public class NoteService {
     
     public List<Note> getAllNotesByUsername(String username) {
         return userRepository.findByUsername(username)
-            .map(noteRepository::findByUserOrderBySortOrderAsc)
+            .map(noteRepository::findByUserAndActiveTrueOrderBySortOrderAsc)
             .orElse(Collections.emptyList());
     }
     
@@ -89,7 +89,7 @@ public class NoteService {
     public List<Note> findByUserOrderByOrderAsc(String username) {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new IllegalArgumentException("ユーザーが見つかりません"));
-        return noteRepository.findByUserOrderBySortOrderAsc(user);
+        return noteRepository.findByUserAndActiveTrueOrderBySortOrderAsc(user);
     }
 
     
@@ -97,7 +97,7 @@ public class NoteService {
     public List<NoteSummaryDTO> getAllNotes(User user) {
 
         // 3. ユーザーに紐づくノートを order 昇順で取得
-        List<Note> notes = noteRepository.findByUserOrderBySortOrderAsc(user);
+        List<Note> notes = noteRepository.findByUserAndActiveTrueOrderBySortOrderAsc(user);
 
         // 4. Note リストを NoteSummaryDTO リストに変換（コンテンツ加工含む）
         return notes.stream()
@@ -109,14 +109,14 @@ public class NoteService {
     }
     
     public Optional<Note> findFirstNoteBySortOrder(User user) {
-        return noteRepository.findFirstByUserOrderBySortOrderAsc(user);
+        return noteRepository.findFirstByUserAndActiveTrueOrderBySortOrderAsc(user);
     }
 
     // ノート選択時に一覧を取得
     public List<NoteSummaryDTO> getNotesForUser(String username) {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new IllegalArgumentException("ユーザーが見つかりません"));
-        return noteRepository.findByUserOrderBySortOrderAsc(user).stream()
+        return noteRepository.findByUserAndActiveTrueOrderBySortOrderAsc(user).stream()
             .map(NoteDtoAssembler::toDto)
             .collect(Collectors.toList());
     }
