@@ -34,5 +34,9 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     // Optional<Note> findFirstByUserOrderBySortOrderAsc(User user);
     
     Optional<Note> findFirstByUserAndActiveTrueOrderBySortOrderAsc(User user);
+    
+    @Modifying
+    @Query("UPDATE Note n SET n.sortOrder = n.sortOrder - 1 WHERE n.active = true AND n.sortOrder > :sortOrder")
+    void decrementSortOrdersAfter(int sortOrder);
 
 }

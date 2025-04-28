@@ -86,42 +86,100 @@ document.addEventListener("DOMContentLoaded", function () {
 	        });
 	}
 	
+	const deleteMainNoteBtn = document.getElementById('delete-main-note');
+	if (deleteMainNoteBtn) {
+	    deleteMainNoteBtn.addEventListener('click', () => {
+	        const noteId = document.querySelector('#main-note-form input[name="id"]').value;
+	        deleteNote(noteId);
+	    });
+	}
+	
 	getAllNotes(); // 初回読み込み時にも実行
 });
 
-async function getAllNotes() {
-    const sidebarNotes = document.getElementById('sidebar-notes');
-    if (!sidebarNotes) return;
+async function deleteNote(noteId) {
+    if (!confirm("本当にこのノートをゴミ箱に移動しますか？")) {
+        return;
+    }
 
-    try {
-        const res = await fetch('/notes/list-data');
-        const data = await res.json();
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
-        sidebarNotes.innerHTML = ''; // クリアして再描画
-        data.forEach(note => {
-            const div = document.createElement('div');
-            div.className = 'note-summary';
-            div.id = `note-${note.id}`;
-            div.onclick = () => {
-                window.location.href = `/notes/${note.id}`;
-            };
-            div.innerHTML = `
-                <div class="note-title">${note.title}</div>
-                <div class="note-content-preview">${
-                    note.summaryContent.length > 24
-                        ? note.summaryContent.substring(0, 24) + '…'
-                        : note.summaryContent
-                }</div>
-            `;
-            sidebarNotes.appendChild(div);
-        });
-    } catch (err) {
-        console.error('ノート一覧の取得に失敗しました', err);
+    const response = await fetch(`/notes/${noteId}/trash`, {
+        method: 'POST',
+        headers: {
+            [csrfHeader]: csrfToken
+        },
+        credentials: "include"
+    });
+
+    if (response.ok) {
+        console.log(`ノートID ${noteId} をゴミ箱に移動しました`);
+        await refreshSidebarAndMainArea();
+    } else {
+        alert("削除に失敗しました");
     }
 }
 
+// サイドバーとメインエリアを両方更新する
+async function refreshSidebarAndMainArea() {
+    await getAllNotes();      // サイドバー更新
+    await loadFirstNote();    // sort_order=0のノートを取得して編集エリア更新
+}
+
+async function getAllNotes() {
+    const sidebarNotes = document.getElementById('sidebar-notes');
+    const response = await fetch('/notes/list-data', { credentials: "include" });
+    if (!response.ok) {
+        console.error("ノート一覧取得失敗");
+        return;
+    }
+
+    const notes = await response.json();
+    sidebarNotes.innerHTML = '';
+
+    notes.forEach(note => {
+        const div = document.createElement('div');
+        div.className = 'note-summary';
+        div.id = `note-${note.id}`;
+        div.innerHTML = `
+            <div class="note-title">${note.title}</div>
+            <div class="note-content-preview">${
+                note.summaryContent.length > 24
+                    ? note.summaryContent.substring(0, 24) + '…'
+                    : note.summaryContent
+            }</div>
+            <button type="button" class="delete-note-button" data-note-id="${note.id}">ゴミ箱に移動</button>
+        `;
+
+        div.querySelector('.delete-note-button').addEventListener('click', (e) => {
+            e.stopPropagation(); // ノートクリックを防止
+            deleteNote(note.id);
+        });
+
+        div.addEventListener('click', () => {
+            window.location.href = `/notes/${note.id}`;
+        });
+
+        sidebarNotes.appendChild(div);
+    });
+}
 
 function loadNote(noteId) {
     window.location.href = `/notes/${noteId}`;
 }
 
+async function loadFirstNote() {
+    const response = await fetch('/notes/list-data', { credentials: "include" });
+    if (!response.ok) {
+        console.error("ノート一覧取得失敗");
+        return;
+    }
+    const notes = await response.json();
+    if (notes.length === 0) {
+        location.reload(); // ノートゼロ件ならリロードして「ノートがありません」表示に
+        return;
+    }
+    const firstNoteId = notes.find(n => n.sortOrder === 0)?.id || notes[0].id;
+    window.location.href = `/notes/${firstNoteId}`;
+}

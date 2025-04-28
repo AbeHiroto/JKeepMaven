@@ -27,6 +27,7 @@
 				            <textarea id="main-note-content" name="content" class="note-content-textarea" th:text="${selectedNote.content}"></textarea>
 				        </div>
 				        <button type="submit">更新</button>
+						<button type="button" id="delete-main-note">ゴミ箱へ移動</button>
 				    </form>
 				</th:block>
 
@@ -61,6 +62,7 @@
 				             th:text="${note.summaryContent.length() > 24} ? ${note.summaryContent.substring(0, 24)} + '…' : ${note.summaryContent}">
 				            本文プレビュー
 				        </div>
+						<button type="button" class="delete-note-button" th:data-note-id="${note.id}">ゴミ箱へ移動</button>
 				    </div>
 				</div>
 			</div>
