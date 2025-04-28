@@ -125,5 +125,21 @@ public class NoteService {
         return noteRepository.findByIdAndUserUsername(id, username)
             .orElseThrow(() -> new IllegalArgumentException("該当するノートが見つかりません"));
     }
+    
+    @Transactional
+    public void moveNoteToTrash(Long noteId) {
+        // 1. 対象ノートを取得
+        Note note = noteRepository.findById(noteId)
+            .orElseThrow(() -> new RuntimeException("Note not found"));
 
+        int oldSortOrder = note.getSortOrder();
+
+        // 2. ノートのactiveとsortOrderを更新
+        note.setActive(false);
+        note.setSortOrder(1000);
+        noteRepository.save(note);
+
+        // 3. 他のノートのsort_orderを1減らす
+        noteRepository.decrementSortOrdersAfter(oldSortOrder);
+    }
 }

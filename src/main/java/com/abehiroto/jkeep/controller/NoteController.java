@@ -113,7 +113,13 @@ public class NoteController {
         return "redirect:/notes/" + id;  // 更新後、そのノートにリダイレクト
     }
     
-    // ※要別ファイル切り出し
+    @PostMapping("/{noteId}/trash")
+    public ResponseEntity<Void> moveNoteToTrash(@PathVariable Long noteId) {
+        noteService.moveNoteToTrash(noteId);
+        return ResponseEntity.ok().build();
+    }
+    
+    // ※実験用。要別ファイル切り出し
     @RestController
     @RequestMapping("/api/notes")
     public class NoteRestController {
