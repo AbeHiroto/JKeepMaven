@@ -142,4 +142,29 @@ public class NoteService {
         // 3. 他のノートのsort_orderを1減らす
         noteRepository.decrementSortOrdersAfter(oldSortOrder);
     }
+    
+    @Transactional
+    public void moveNote(Long noteId, String direction) {
+        Note targetNote = noteRepository.findById(noteId)
+                .orElseThrow(() -> new IllegalArgumentException("ノートが見つかりません"));
+
+        int currentOrder = targetNote.getSortOrder();
+        int newOrder = "up".equals(direction) ? currentOrder - 1 : currentOrder + 1;
+
+        // 境界チェック（必要に応じて）
+        if (newOrder < 0) {
+            return; // 最上部より上には行かせない
+        }
+
+        // 同じsort_orderを持つノートを探す
+        Optional<Note> conflictNoteOpt = noteRepository.findBySortOrder(newOrder);
+        if (conflictNoteOpt.isPresent()) {
+            Note conflictNote = conflictNoteOpt.get();
+            conflictNote.setSortOrder(currentOrder);
+            noteRepository.save(conflictNote);
+        }
+
+        targetNote.setSortOrder(newOrder);
+        noteRepository.save(targetNote);
+    }
 }

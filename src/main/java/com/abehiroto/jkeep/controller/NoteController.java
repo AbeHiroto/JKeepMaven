@@ -118,6 +118,13 @@ public class NoteController {
         noteService.moveNoteToTrash(noteId);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{id}/move")
+    public ResponseEntity<?> moveNote(@PathVariable Long id, @RequestParam String direction) {
+        noteService.moveNote(id, direction);
+        return ResponseEntity.ok().build();
+    }
+
     
     // ※実験用。要別ファイル切り出し
     @RestController

@@ -39,4 +39,7 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     @Query("UPDATE Note n SET n.sortOrder = n.sortOrder - 1 WHERE n.active = true AND n.sortOrder > :sortOrder")
     void decrementSortOrdersAfter(int sortOrder);
 
+    Optional<Note> findBySortOrder(int sortOrder);
+
+
 }

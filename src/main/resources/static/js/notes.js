@@ -142,15 +142,33 @@ async function getAllNotes() {
         const div = document.createElement('div');
         div.className = 'note-summary';
         div.id = `note-${note.id}`;
-        div.innerHTML = `
-            <div class="note-title">${note.title}</div>
-            <div class="note-content-preview">${
-                note.summaryContent.length > 24
-                    ? note.summaryContent.substring(0, 24) + '…'
-                    : note.summaryContent
-            }</div>
-            <button type="button" class="delete-note-button" data-note-id="${note.id}">ゴミ箱に移動</button>
-        `;
+		div.innerHTML = `
+		    <div class="note-header">
+		        <div class="note-title">${note.title}</div>
+				<div class="note-actions">
+				    <button type="button" class="move-note-up" data-note-id="${note.id}">▲</button>
+				    <button type="button" class="move-note-down" data-note-id="${note.id}">▼</button>
+				    <button type="button" class="delete-note-button" data-note-id="${note.id}">🗑️</button>
+				</div>
+		    </div>
+		    <div class="note-content-preview">${
+		        note.summaryContent.length > 24
+		            ? note.summaryContent.substring(0, 24) + '…'
+		            : note.summaryContent
+		    }</div>
+		`;
+		
+		// 上移動ボタン
+		div.querySelector('.move-note-up').addEventListener('click', (e) => {
+		    e.stopPropagation();
+		    moveNote(note.id, "up");
+		});
+
+		// 下移動ボタン
+		div.querySelector('.move-note-down').addEventListener('click', (e) => {
+		    e.stopPropagation();
+		    moveNote(note.id, "down");
+		});
 
         div.querySelector('.delete-note-button').addEventListener('click', (e) => {
             e.stopPropagation(); // ノートクリックを防止
@@ -182,4 +200,25 @@ async function loadFirstNote() {
     }
     const firstNoteId = notes.find(n => n.sortOrder === 0)?.id || notes[0].id;
     window.location.href = `/notes/${firstNoteId}`;
+}
+
+// 簡易的な実装。最終的にはドラッグ操作で並べ替えできるようにする
+async function moveNote(noteId, direction) {
+	const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+	const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+	
+    const response = await fetch(`/notes/${noteId}/move?direction=${direction}`, {
+        method: "POST",
+		headers: {
+		    [csrfHeader]: csrfToken
+		},
+        credentials: "include"
+    });
+
+    if (!response.ok) {
+        console.error("ノート移動失敗");
+        return;
+    }
+
+    await getAllNotes(); // 成功したらノート一覧リロード
 }
