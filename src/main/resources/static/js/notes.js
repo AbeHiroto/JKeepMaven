@@ -142,15 +142,17 @@ async function getAllNotes() {
         const div = document.createElement('div');
         div.className = 'note-summary';
         div.id = `note-${note.id}`;
-        div.innerHTML = `
-            <div class="note-title">${note.title}</div>
-            <div class="note-content-preview">${
-                note.summaryContent.length > 24
-                    ? note.summaryContent.substring(0, 24) + '…'
-                    : note.summaryContent
-            }</div>
-            <button type="button" class="delete-note-button" data-note-id="${note.id}">ゴミ箱に移動</button>
-        `;
+		div.innerHTML = `
+		    <div class="note-header">
+		        <div class="note-title">${note.title}</div>
+		        <button type="button" class="delete-note-button" data-note-id="${note.id}">🗑️</button>
+		    </div>
+		    <div class="note-content-preview">${
+		        note.summaryContent.length > 24
+		            ? note.summaryContent.substring(0, 24) + '…'
+		            : note.summaryContent
+		    }</div>
+		`;
 
         div.querySelector('.delete-note-button').addEventListener('click', (e) => {
             e.stopPropagation(); // ノートクリックを防止

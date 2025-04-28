@@ -47,7 +47,9 @@
             padding: 10px;
         }
 
-        .note-summary {
+        /* サイドバー内スタイル */
+		.note-summary {
+			position: relative;
             padding: 10px;
             border-bottom: 1px solid #ccc;
             cursor: pointer;
@@ -56,10 +58,34 @@
         .note-summary:hover {
             background-color: #e0e0e0;
         }
+		
+		.note-header {
+		    display: flex;
+		    justify-content: space-between;
+		    align-items: center;
+		}
 
-        .note-title {
-            font-weight: bold;
-        }
+		.note-title {
+		    font-weight: bold;
+		    font-size: 16px;
+		    overflow: hidden;
+		    white-space: nowrap;
+		    text-overflow: ellipsis;
+		}
+		
+		.delete-note-button {
+		    background: none;
+		    border: none;
+		    cursor: pointer;
+		    font-size: 18px; /* アイコン大きめにする */
+		    color: #888;
+		    padding: 0;
+		    margin-left: 8px;
+		}
+
+		.delete-note-button:hover {
+		    color: red;
+		}
 
         .note-content-preview {
             color: #666;
