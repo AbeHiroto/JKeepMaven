@@ -124,42 +124,4 @@ public class NoteController {
         noteService.moveNote(id, direction);
         return ResponseEntity.ok().build();
     }
-
-    
-    // ※実験用。要別ファイル切り出し
-    @RestController
-    @RequestMapping("/api/notes")
-    public class NoteRestController {
-
-        private final NoteService noteService;
-        private final UserRepository userRepository;
-
-        public NoteRestController(NoteService noteService, UserRepository userRepository) {
-            this.noteService = noteService;
-            this.userRepository = userRepository;
-        }
-
-        @PostMapping
-        public ResponseEntity<?> createNoteFromJson(
-                @RequestBody NoteCreateRequest request,
-                @AuthenticationPrincipal UserDetails userDetails) {
-
-            if (userDetails == null) {
-                return ResponseEntity.status(401).body("ログインユーザーが見つかりません");
-            }
-
-            String username = userDetails.getUsername();
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + username));
-
-            Note note = new Note();
-            note.setTitle(request.getTitle());
-            note.setContent(request.getContent());
-
-            Note savedNote = noteService.saveNewNote(note, user);
-
-            return ResponseEntity.ok().build(); // 必要に応じてsavedNoteの情報を返す
-        }
-    }
-
 }
