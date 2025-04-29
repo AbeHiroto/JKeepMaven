@@ -5,7 +5,7 @@ import java.util.Optional;
 
 public class NoteDtoAssembler {
 	
-	public static NoteSummaryDTO toDto(Note note) {
+	public static NoteSummaryDTO toSummaryDto(Note note) {
         String originalContent = Optional.ofNullable(note.getContent()).orElse("");
         String summaryContent;
 

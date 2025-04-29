@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Optional;
 
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 //import org.springframework.security.core.Authentication;
 //import org.springframework.security.core.context.SecurityContextHolder;
 //import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +21,7 @@ import com.abehiroto.jkeep.repository.NoteRepository;
 import com.abehiroto.jkeep.dto.NoteSummaryDTO;
 import com.abehiroto.jkeep.dto.NoteDtoAssembler;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -101,7 +103,7 @@ public class NoteService {
 
         // 4. Note リストを NoteSummaryDTO リストに変換（コンテンツ加工含む）
         return notes.stream()
-                .map(NoteDtoAssembler::toDto)
+                .map(NoteDtoAssembler::toSummaryDto)
                 .collect(Collectors.toList());
 //        return notes.stream()
 //                .map(this::convertToDto) // 各 Note を DTO に変換
@@ -117,7 +119,7 @@ public class NoteService {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new IllegalArgumentException("ユーザーが見つかりません"));
         return noteRepository.findByUserAndActiveTrueOrderBySortOrderAsc(user).stream()
-            .map(NoteDtoAssembler::toDto)
+            .map(NoteDtoAssembler::toSummaryDto)
             .collect(Collectors.toList());
     }
     
@@ -167,4 +169,39 @@ public class NoteService {
         targetNote.setSortOrder(newOrder);
         noteRepository.save(targetNote);
     }
+    
+    public List<NoteSummaryDTO> getTrashedNotes(User user) {
+        List<Note> notes = noteRepository.findByUserAndActiveFalseOrderByLastEditedDesc(user);
+        return notes.stream()
+                    .map(NoteDtoAssembler::toSummaryDto)
+                    .collect(Collectors.toList());
+    }
+    
+    public Optional<Note> findLatestTrashedNote(User user) {
+        return noteRepository.findTopTrashedNoteByUser(user);
+    }
+    
+    public Note getTrashedNoteByIdAndUser(Long id, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        return noteRepository.findByIdAndUserAndActiveFalse(id, user)
+                .orElseThrow(() -> new EntityNotFoundException("Trashed note not found for id: " + id));
+    }
+
+    public void restoreNote(Long noteId, String username) {
+        Note note = getNoteByIdAndUser(noteId, username);
+
+        // sort_order=0に設定、他のactiveノートのsort_orderを+1
+        List<Note> activeNotes = noteRepository.findByUser_UsernameAndActiveTrueOrderBySortOrderAsc(username);
+        for (Note n : activeNotes) {
+            n.setSortOrder(n.getSortOrder() + 1);
+        }
+        note.setActive(true);
+        note.setSortOrder(0);
+
+        noteRepository.save(note);
+        noteRepository.saveAll(activeNotes);
+    }
+
 }
