@@ -172,7 +172,7 @@ public class NoteController {
         return "notes/trash"; // ゴミ箱テンプレート
     }
 
-    @PostMapping("/{id}/restore")
+    @PostMapping("/restore/{id}")
     public String restoreNote(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails, Model model) {
         if (userDetails == null) {
             throw new IllegalStateException("User details not found in security context.");

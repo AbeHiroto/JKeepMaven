@@ -178,7 +178,7 @@ public class NoteService {
     }
     
     public Optional<Note> findLatestTrashedNote(User user) {
-        return noteRepository.findTopTrashedNoteByUser(user);
+        return noteRepository.findTop1ByUserAndActiveFalseOrderByLastEditedDesc(user);
     }
     
     public Note getTrashedNoteByIdAndUser(Long id, String username) {

@@ -47,8 +47,8 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     // 復元処理用：active=trueのノート一覧
     List<Note> findByUser_UsernameAndActiveTrueOrderBySortOrderAsc(String username);
     
-    @Query("SELECT n FROM Note n WHERE n.user = :user AND n.active = false ORDER BY n.lastEdited DESC")
-    Optional<Note> findTopTrashedNoteByUser(@Param("user") User user);
+    // ゴミ箱メインエリアに表示するノート
+    Optional<Note> findTop1ByUserAndActiveFalseOrderByLastEditedDesc(User user);
     
     // ゴミ箱内の特定のノートの内容を取得
     Optional<Note> findByIdAndUserAndActiveFalse(Long id, User user);
