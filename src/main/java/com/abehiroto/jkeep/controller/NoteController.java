@@ -2,7 +2,7 @@ package com.abehiroto.jkeep.controller;
 
 import com.abehiroto.jkeep.bean.Note;
 import com.abehiroto.jkeep.bean.User;
-import com.abehiroto.jkeep.dto.NoteCreateRequest;
+// import com.abehiroto.jkeep.dto.NoteCreateRequest;
 import com.abehiroto.jkeep.dto.NoteDetailDTO;
 import com.abehiroto.jkeep.dto.NoteDtoAssembler;
 import com.abehiroto.jkeep.dto.NoteSummaryDTO;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+// import java.util.stream.Collectors;
 
 //import org.springframework.security.core.Authentication;
 //import org.springframework.security.core.context.SecurityContextHolder;
@@ -124,42 +124,78 @@ public class NoteController {
         noteService.moveNote(id, direction);
         return ResponseEntity.ok().build();
     }
-
     
-    // ※実験用。要別ファイル切り出し
-    @RestController
-    @RequestMapping("/api/notes")
-    public class NoteRestController {
+    @GetMapping("/trash")
+    public String showTrashList(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            throw new IllegalStateException("User details not found in security context.");
+        }
+        String username = userDetails.getUsername();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        private final NoteService noteService;
-        private final UserRepository userRepository;
-
-        public NoteRestController(NoteService noteService, UserRepository userRepository) {
-            this.noteService = noteService;
-            this.userRepository = userRepository;
+        List<NoteSummaryDTO> trashNotes = noteService.getTrashedNotes(currentUser);
+        
+        // ★ 最も最近ゴミ箱に入ったノートを取得
+        Optional<Note> latestTrashedNote = noteService.findLatestTrashedNote(currentUser);
+        NoteDetailDTO selectedNote = latestTrashedNote
+                .map(NoteDtoAssembler::toDetailDto)
+                .orElse(null);
+        
+        model.addAttribute("trashedNotes", trashNotes);
+        model.addAttribute("selectedNote", selectedNote);
+        model.addAttribute("username", currentUser.getUsername());
+        return "notes/trash";  // ← ゴミ箱画面のThymeleafテンプレート
+    }
+    
+    @GetMapping("/trash/{id}")
+    public String showTrashedNote(@PathVariable Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            throw new IllegalStateException("User details not found in security context.");
         }
 
-        @PostMapping
-        public ResponseEntity<?> createNoteFromJson(
-                @RequestBody NoteCreateRequest request,
-                @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-            if (userDetails == null) {
-                return ResponseEntity.status(401).body("ログインユーザーが見つかりません");
-            }
+        // サイドバー表示用：ゴミ箱内全ノート
+        List<NoteSummaryDTO> trashNotes = noteService.getTrashedNotes(currentUser);
 
-            String username = userDetails.getUsername();
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + username));
+        // メインエリア表示用：選択ノートの詳細
+        Note note = noteService.getTrashedNoteByIdAndUser(id, username); // 後述するservice側も必要
+        NoteDetailDTO selectedTrashedNote = NoteDtoAssembler.toDetailDto(note);
 
-            Note note = new Note();
-            note.setTitle(request.getTitle());
-            note.setContent(request.getContent());
+        model.addAttribute("trashedNotes", trashNotes);
+        model.addAttribute("selectedTrashedNote", selectedTrashedNote);
+        model.addAttribute("username", username);
 
-            Note savedNote = noteService.saveNewNote(note, user);
-
-            return ResponseEntity.ok().build(); // 必要に応じてsavedNoteの情報を返す
-        }
+        return "notes/trash"; // ゴミ箱テンプレート
     }
 
+    @PostMapping("/restore/{id}")
+    public String restoreNote(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails, Model model) {
+        if (userDetails == null) {
+            throw new IllegalStateException("User details not found in security context.");
+        }
+
+        String username = userDetails.getUsername();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        // ノートを復元（active = trueにする）
+        noteService.restoreNote(id, username);
+
+        // 最新のゴミ箱ノートを取得（※復元されたノートは除かれている）
+        List<NoteSummaryDTO> trashNotes = noteService.getTrashedNotes(currentUser);
+        Optional<Note> latestTrashedNote = noteService.findLatestTrashedNote(currentUser);
+        NoteDetailDTO selectedNote = latestTrashedNote
+                .map(NoteDtoAssembler::toDetailDto)
+                .orElse(null);
+
+        model.addAttribute("trashedNotes", trashNotes);
+        model.addAttribute("selectedNote", selectedNote);
+        model.addAttribute("username", currentUser.getUsername());
+
+        return "notes/trash"; // ゴミ箱ページにとどまる
+    }
 }
