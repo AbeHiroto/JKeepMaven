@@ -29,13 +29,19 @@
     <div id="sidebar">
         <h3>削除済ノート</h3>
 		<div th:each="note : ${trashedNotes}">
-		    <a th:href="@{'/notes/trash/' + ${note.id}}" class="note-summary" th:id="'note-' + ${note.id}">
-		        <div class="note-title" th:text="${note.title}">タイトル</div>
+		    <div class="note-summary" th:id="'note-' + ${note.id}">
+		        <div class="note-header">
+		            <a th:href="@{'/notes/trash/' + ${note.id}}" class="note-title" th:text="${note.title}">タイトル</a>
+		            <form th:action="@{'/notes/restore/' + ${note.id}}" method="post">
+		                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+		                <button type="submit" class="delete-note-button" title="元に戻す">↩</button>
+		            </form>
+		        </div>
 		        <div class="note-content-preview"
 		             th:text="${note.summaryContent.length() > 24} ? ${note.summaryContent.substring(0, 24)} + '…' : ${note.summaryContent}">
 		            本文プレビュー
 		        </div>
-		    </a>
+		    </div>
 		</div>
         <br>
         <a href="/notes"><button>編集画面に戻る</button></a>
