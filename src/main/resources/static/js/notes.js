@@ -94,6 +94,28 @@ document.addEventListener("DOMContentLoaded", function () {
 	    });
 	}
 	
+	const copyButton = document.getElementById('copy-content-button');
+	const textarea = document.getElementById('main-note-content');
+
+	copyButton.addEventListener('click', function () {
+	    if (textarea) {
+	        // 選択してコピー
+	        textarea.select();
+	        try {
+	            const successful = document.execCommand('copy');
+	            if (successful) {
+	                alert('本文をクリップボードにコピーしました。');
+	            } else {
+	                alert('コピーに失敗しました。');
+	            }
+	        } catch (err) {
+	            alert('コピー中にエラーが発生しました。');
+	        }
+	        // 選択解除
+	        window.getSelection().removeAllRanges();
+	    }
+	});
+	
 	getAllNotes(); // 初回読み込み時にも実行
 });
 
