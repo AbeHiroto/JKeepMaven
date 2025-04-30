@@ -143,7 +143,7 @@ public class NoteController {
                 .orElse(null);
         
         model.addAttribute("trashedNotes", trashNotes);
-        model.addAttribute("selectedNote", selectedNote);
+        model.addAttribute("selectedTrashedNote", selectedNote);
         model.addAttribute("username", currentUser.getUsername());
         return "notes/trash";  // ← ゴミ箱画面のThymeleafテンプレート
     }
