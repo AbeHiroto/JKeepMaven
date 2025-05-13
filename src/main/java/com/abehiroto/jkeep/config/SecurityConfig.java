@@ -14,12 +14,12 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import jakarta.servlet.http.HttpServletResponse;
 
-import static org.springframework.security.config.Customizer.withDefaults;
+// import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    @SuppressWarnings("removal")
+    // @SuppressWarnings("removal")
 	@Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     	http
@@ -38,7 +38,9 @@ public class SecurityConfig {
                 })
             )
         .csrf(csrf -> csrf
-            .ignoringRequestMatchers("/h2-console/**", "/notes", "/notes/list-data") // CSRF無効化
+        	// ※/notesの無効化はPostメソッドにおいてセキュリティホールとなりうるので修正！！！
+        	// ※/notes/list-dataについても不要なCSRF無効化のため修正
+            .ignoringRequestMatchers("/h2-console/**") // CSRF無効化
         )
         .headers(headers -> headers
         		.frameOptions(options -> options.sameOrigin()) // H2コンソール用に sameOrigin を許可 (推奨)
