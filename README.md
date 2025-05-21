@@ -1,13 +1,13 @@
 ![Java CI](https://github.com/AbeHiroto/JavaAppDemo/actions/workflows/java-ci.yml/badge.svg)
-[![codecov](https://codecov.io/gh/AbeHiroto/JavaAppDemo/branch/main/graph/badge.svg)](https://codecov.io/gh/AbeHiroto/JavaAppDemo)
+[![codecov](https://codecov.io/gh/AbeHiroto/JavaAppDemo/graph/badge.svg)](https://codecov.io/gh/AbeHiroto/JavaAppDemo)
 ## **1. プロジェクト概要**
-### **1.1. 概要**
+### **1.1. 要約**
 本プロジェクトは「クラウド型メモアプリのプロトタイプ制作」というテーマで、Java開発の実務における工程の実践と学習を目的としています。
 
 ### **1.2. 開発手法・技術**
 - **エディタ**: Spring Tools Suite 4 (Eclipse)
 - **CIツール**:
-  - GitHub Actions (作業ブランチからのプルリクマージ時に自動テストを実行)
+  - GitHub Actions
   - JacocoとCodecovによるテストカバレッジ率の可視化
 - **その他開発手法**:
   - テスト駆動開発の部分的実践
