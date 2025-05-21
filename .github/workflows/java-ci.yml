@@ -25,8 +25,8 @@ jobs:
         cache: 'maven' # 依存関係キャッシュ
 
     # ステップ3: テスト実行
-    - name: Run tests with Maven
-      run: mvn test
+    - name: Build and test with JaCoCo
+      run: mvn -B clean verify jacoco:report
 
     # ステップ4: テストレポート保存（失敗時も実行）
     - name: Upload Test Report
@@ -46,11 +46,12 @@ jobs:
       run: ls -la
 
     # JaCoCoテストカバレッジ
-    - name: Build and test with JaCoCo
-      run: mvn -B clean test jacoco:report
-
     - name: Upload JaCoCo report
       uses: actions/upload-artifact@v4
       with:
         name: jacoco-report
         path: target/site/jacoco
+
+    # Codecov
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
