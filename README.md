@@ -1,4 +1,5 @@
 ![Java CI](https://github.com/AbeHiroto/JKeepMaven/actions/workflows/java-ci.yml/badge.svg)
+[![codecov](https://codecov.io/gh/AbeHiroto/JKeepMaven/branch/main/graph/badge.svg)](https://codecov.io/gh/AbeHiroto/JKeepMaven)
 ## **1. プロジェクト概要**
 ### **1.1. 背景**
 本プロジェクトは、個人利用を目的としたTODOアプリを開発するものです。バックエンドはJavaで開発し、MVCアーキテクチャを採用します。フロントエンドはHTML、CSS、JavaScriptで構成します。
