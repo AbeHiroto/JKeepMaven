@@ -53,5 +53,5 @@ jobs:
         path: target/site/jacoco
 
     # Codecov
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
