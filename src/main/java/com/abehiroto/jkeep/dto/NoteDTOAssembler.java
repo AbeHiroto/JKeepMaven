@@ -3,7 +3,7 @@ package com.abehiroto.jkeep.dto;
 import com.abehiroto.jkeep.bean.Note;
 import java.util.Optional;
 
-public class NoteDtoAssembler {
+public class NoteDTOAssembler {
 	
 	public static NoteSummaryDTO toSummaryDto(Note note) {
         String originalContent = Optional.ofNullable(note.getContent()).orElse("");

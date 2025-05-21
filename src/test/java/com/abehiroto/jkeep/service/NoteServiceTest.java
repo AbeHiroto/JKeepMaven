@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
+import java.util.Optional;
 
 // import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,15 +19,20 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
 import com.abehiroto.jkeep.bean.Note;
 import com.abehiroto.jkeep.bean.User;
 import com.abehiroto.jkeep.repository.NoteRepository;
+import com.abehiroto.jkeep.repository.UserRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class NoteServiceTest {	
 
-    @Mock
-    private NoteRepository noteRepository;
+    @Mock private NoteRepository noteRepository;
+    @Mock private UserRepository userRepository;
 
     @InjectMocks
     private NoteService noteService;
@@ -218,6 +224,159 @@ class NoteServiceTest {
 	        
 	        Note result = noteService.saveNewNote(note, createTestUser());
 	        assertThat(result.getTitle()).hasSizeLessThanOrEqualTo(255);
+	    }
+	}
+	
+	@Nested
+	class EditNoteTest {
+
+	    @Test
+	    void shouldUpdateNoteWhenUserMatches() {
+	        User user = createTestUser();
+	        Note existingNote = Note.builder()
+	                .id(1L)
+	                .title("Old Title")
+	                .content("Old Content")
+	                .user(user)
+	                .build();
+
+	        when(noteRepository.findById(1L)).thenReturn(Optional.of(existingNote));
+	        when(noteRepository.save(any(Note.class))).thenAnswer(inv -> inv.getArgument(0));
+
+	        Note updated = noteService.editNote(1L, "New Title", "New Content", "test");
+
+	        assertEquals("New Title", updated.getTitle());
+	        assertEquals("New Content", updated.getContent());
+	    }
+
+	    @Test
+	    void shouldThrowWhenNoteNotFound() {
+	        when(noteRepository.findById(1L)).thenReturn(Optional.empty());
+
+	        assertThrows(IllegalArgumentException.class, () ->
+	            noteService.editNote(1L, "Title", "Content", "test")
+	        );
+	    }
+
+	    @Test
+	    void shouldThrowWhenUserIsNotOwner() {
+	        User user = createTestUser();
+	        user.setUsername("owner");
+	        Note note = Note.builder().id(1L).user(user).build();
+
+	        when(noteRepository.findById(1L)).thenReturn(Optional.of(note));
+
+	        assertThrows(SecurityException.class, () ->
+	            noteService.editNote(1L, "X", "Y", "notOwner")
+	        );
+	    }
+	}
+	
+	@Nested
+	class MoveNoteToTrashTest {
+
+	    @Test
+	    void shouldMarkNoteAsTrashedAndUpdateOrder() {
+	        Note note = Note.builder()
+	            .id(1L)
+	            .sortOrder(2)
+	            .build();
+
+	        when(noteRepository.findById(1L)).thenReturn(Optional.of(note));
+
+	        noteService.moveNoteToTrash(1L);
+
+	        assertFalse(note.isActive());
+	        assertEquals(1000, note.getSortOrder());
+	        verify(noteRepository).decrementSortOrdersAfter(2);
+	        verify(noteRepository).save(note);
+	    }
+
+	    @Test
+	    void shouldThrowWhenNoteNotFound() {
+	        when(noteRepository.findById(99L)).thenReturn(Optional.empty());
+
+	        assertThrows(RuntimeException.class, () -> {
+	            noteService.moveNoteToTrash(99L);
+	        });
+	    }
+	}
+	
+	@Nested
+	class RestoreNoteTest {
+
+	    @Test
+	    void shouldRestoreNoteAndShiftOthers() {
+	        User user = createTestUser();
+	        Note targetNote = Note.builder()
+	                .id(1L)
+	                .user(user)
+	                .active(false)
+	                .sortOrder(1000)
+	                .build();
+
+	        Note otherNote = Note.builder()
+	                .id(2L)
+	                .user(user)
+	                .active(true)
+	                .sortOrder(0)
+	                .build();
+
+	        // ↓不要なスタブのため削除
+//	        when(userRepository.findByUsername("test")).thenReturn(Optional.of(user));
+	        when(noteRepository.findByIdAndUserUsername(1L, "test")).thenReturn(Optional.of(targetNote));
+	        when(noteRepository.findByUser_UsernameAndActiveTrueOrderBySortOrderAsc("test"))
+	            .thenReturn(List.of(otherNote));
+
+	        noteService.restoreNote(1L, "test");
+
+	        assertTrue(targetNote.isActive());
+	        assertEquals(0, targetNote.getSortOrder());
+	        assertEquals(1, otherNote.getSortOrder()); // +1されているか
+
+	        verify(noteRepository).saveAll(List.of(otherNote));
+	        verify(noteRepository).save(targetNote);
+	    }
+	}
+	
+	@Nested
+	class GetNoteByIdTests {
+
+	    @Test
+	    void shouldThrowWhenNoteNotFoundForUser() {
+	        when(noteRepository.findByIdAndUserUsername(1L, "test"))
+	            .thenReturn(Optional.empty());
+
+	        assertThrows(IllegalArgumentException.class, () -> {
+	            noteService.getNoteByIdAndUser(1L, "test");
+	        });
+	    }
+	}
+
+	@Nested
+	class GetTrashedNoteByIdTests {
+
+	    @Test
+	    void shouldThrowWhenUserNotFound() {
+	        when(userRepository.findByUsername("test"))
+	            .thenReturn(Optional.empty());
+
+	        assertThrows(UsernameNotFoundException.class, () -> {
+	            noteService.getTrashedNoteByIdAndUser(1L, "test");
+	        });
+	    }
+
+	    @Test
+	    void shouldThrowWhenNoteNotInTrash() {
+	        User user = createTestUser();
+	        when(userRepository.findByUsername("test"))
+	            .thenReturn(Optional.of(user));
+	        when(noteRepository.findByIdAndUserAndActiveFalse(1L, user))
+	            .thenReturn(Optional.empty());
+
+	        assertThrows(EntityNotFoundException.class, () -> {
+	            noteService.getTrashedNoteByIdAndUser(1L, "test");
+	        });
 	    }
 	}
 }

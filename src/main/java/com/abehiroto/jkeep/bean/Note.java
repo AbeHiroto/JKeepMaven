@@ -55,6 +55,10 @@ public class Note {
         this.lastEdited = LocalDateTime.now();
     }
     
+//    // ※タイトル空欄時のエラーはここが原因！！！コメントアウトしたコードで正常動作
+//    public void setTitle(String title) {
+//        this.title = (title == null || title.isBlank()) ? null : title.trim();
+//    }
     public void setTitle(String title) {
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("タイトル必須");

@@ -2,7 +2,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
-    async function saveNewNote(title, content) {
+    // 現状saveNewNoteは未使用
+	async function saveNewNote(title, content) {
         const response = await fetch('/api/notes', {
             method: 'POST',
             headers: {

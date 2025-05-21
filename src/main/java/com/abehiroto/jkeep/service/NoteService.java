@@ -19,7 +19,7 @@ import com.abehiroto.jkeep.bean.User;
 import com.abehiroto.jkeep.repository.UserRepository;
 import com.abehiroto.jkeep.repository.NoteRepository;
 import com.abehiroto.jkeep.dto.NoteSummaryDTO;
-import com.abehiroto.jkeep.dto.NoteDtoAssembler;
+import com.abehiroto.jkeep.dto.NoteDTOAssembler;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -103,7 +103,7 @@ public class NoteService {
 
         // 4. Note リストを NoteSummaryDTO リストに変換（コンテンツ加工含む）
         return notes.stream()
-                .map(NoteDtoAssembler::toSummaryDto)
+                .map(NoteDTOAssembler::toSummaryDto)
                 .collect(Collectors.toList());
 //        return notes.stream()
 //                .map(this::convertToDto) // 各 Note を DTO に変換
@@ -119,7 +119,7 @@ public class NoteService {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new IllegalArgumentException("ユーザーが見つかりません"));
         return noteRepository.findByUserAndActiveTrueOrderBySortOrderAsc(user).stream()
-            .map(NoteDtoAssembler::toSummaryDto)
+            .map(NoteDTOAssembler::toSummaryDto)
             .collect(Collectors.toList());
     }
     
@@ -147,12 +147,17 @@ public class NoteService {
     
     @Transactional
     public void moveNote(Long noteId, String direction) {
+        if (!"up".equals(direction) && !"down".equals(direction)) {
+            throw new IllegalArgumentException("無効なdirectionパラメータです: " + direction);
+        }
+        
         Note targetNote = noteRepository.findById(noteId)
                 .orElseThrow(() -> new IllegalArgumentException("ノートが見つかりません"));
 
         int currentOrder = targetNote.getSortOrder();
         int newOrder = "up".equals(direction) ? currentOrder - 1 : currentOrder + 1;
 
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!エラー原因※要修正!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // 境界チェック（必要に応じて）
         if (newOrder < 0) {
             return; // 最上部より上には行かせない
@@ -173,7 +178,7 @@ public class NoteService {
     public List<NoteSummaryDTO> getTrashedNotes(User user) {
         List<Note> notes = noteRepository.findByUserAndActiveFalseOrderByLastEditedDesc(user);
         return notes.stream()
-                    .map(NoteDtoAssembler::toSummaryDto)
+                    .map(NoteDTOAssembler::toSummaryDto)
                     .collect(Collectors.toList());
     }
     
