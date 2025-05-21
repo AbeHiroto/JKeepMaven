@@ -4,7 +4,7 @@ import com.abehiroto.jkeep.bean.Note;
 import com.abehiroto.jkeep.bean.User;
 // import com.abehiroto.jkeep.dto.NoteCreateRequest;
 import com.abehiroto.jkeep.dto.NoteDetailDTO;
-import com.abehiroto.jkeep.dto.NoteDtoAssembler;
+import com.abehiroto.jkeep.dto.NoteDTOAssembler;
 import com.abehiroto.jkeep.dto.NoteSummaryDTO;
 import com.abehiroto.jkeep.service.NoteService;
 import com.abehiroto.jkeep.repository.UserRepository;
@@ -52,7 +52,7 @@ public class NoteController {
         Optional<Note> firstNoteOpt = noteService.findFirstNoteBySortOrder(currentUser);
         NoteDetailDTO selectedNote = null;
         if (firstNoteOpt.isPresent()) {
-            selectedNote = NoteDtoAssembler.toDetailDto(firstNoteOpt.get());
+            selectedNote = NoteDTOAssembler.toDetailDto(firstNoteOpt.get());
         }
 
         model.addAttribute("notes", noteSummaries);
@@ -92,7 +92,7 @@ public class NoteController {
         String username = principal.getName();
 
         Note note = noteService.getNoteByIdAndUser(id, username);
-        NoteDetailDTO selectedNote = NoteDtoAssembler.toDetailDto(note);
+        NoteDetailDTO selectedNote = NoteDTOAssembler.toDetailDto(note);
 
         List<NoteSummaryDTO> noteList = noteService.getNotesForUser(username);
 
@@ -139,7 +139,7 @@ public class NoteController {
         // ★ 最も最近ゴミ箱に入ったノートを取得
         Optional<Note> latestTrashedNote = noteService.findLatestTrashedNote(currentUser);
         NoteDetailDTO selectedNote = latestTrashedNote
-                .map(NoteDtoAssembler::toDetailDto)
+                .map(NoteDTOAssembler::toDetailDto)
                 .orElse(null);
         
         model.addAttribute("trashedNotes", trashNotes);
@@ -163,7 +163,7 @@ public class NoteController {
 
         // メインエリア表示用：選択ノートの詳細
         Note note = noteService.getTrashedNoteByIdAndUser(id, username); // 後述するservice側も必要
-        NoteDetailDTO selectedTrashedNote = NoteDtoAssembler.toDetailDto(note);
+        NoteDetailDTO selectedTrashedNote = NoteDTOAssembler.toDetailDto(note);
 
         model.addAttribute("trashedNotes", trashNotes);
         model.addAttribute("selectedTrashedNote", selectedTrashedNote);
@@ -189,7 +189,7 @@ public class NoteController {
         List<NoteSummaryDTO> trashNotes = noteService.getTrashedNotes(currentUser);
         Optional<Note> latestTrashedNote = noteService.findLatestTrashedNote(currentUser);
         NoteDetailDTO selectedNote = latestTrashedNote
-                .map(NoteDtoAssembler::toDetailDto)
+                .map(NoteDTOAssembler::toDetailDto)
                 .orElse(null);
 
         model.addAttribute("trashedNotes", trashNotes);

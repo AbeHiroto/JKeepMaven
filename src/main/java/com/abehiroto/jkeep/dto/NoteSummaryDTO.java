@@ -2,7 +2,7 @@ package com.abehiroto.jkeep.dto;
 
 import java.time.LocalDateTime;
 import lombok.Builder;
-import lombok.Data;
+//import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 // Lombok を使うか、手動で Getter/Setter/コンストラクタを定義
